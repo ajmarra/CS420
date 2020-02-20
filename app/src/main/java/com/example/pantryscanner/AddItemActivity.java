@@ -16,6 +16,7 @@ import android.provider.MediaStore;
 import android.util.SparseArray;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.google.android.gms.vision.Frame;
@@ -29,6 +30,7 @@ public class AddItemActivity extends AppCompatActivity {
     ImageView myImageView;
     Frame frame;
     BarcodeDetector detector;
+    EditText itemName, itemType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +40,9 @@ public class AddItemActivity extends AppCompatActivity {
         btn = findViewById(R.id.button);
         openBtn = findViewById(R.id.uploadButton);
         cameraBtn = findViewById(R.id.cameraButton);
+
+        itemName = findViewById(R.id.itemText);
+        itemType = findViewById(R.id.itemType);
 
         myImageView = findViewById(R.id.imgview);
         /*Bitmap myBitmap = BitmapFactory.decodeResource(
