@@ -25,7 +25,7 @@
         tools:ignore="MissingConstraints" />
 
     <Button
-        android:id="@+id/recipeButton"
+        android:id="@+id/mainRecipeButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="21dp"

@@ -14,10 +14,12 @@ public class RecipeActivity extends AppCompatActivity {
 
         WebView recipeWebview = (WebView) findViewById(R.id.recipeWebview);
 
-//        recipeWebview.getSettings().setLoadWithOverviewMode(true); // TODO: Add reason for this line
-//        recipeWebview.getSettings().setUseWideViewPort(true); // TODO: Add reason for this line
+//        recipeWebview.getSettings().setLoadWithOverviewMode(true); // TODO: Do we need this?
+//        recipeWebview.getSettings().setUseWideViewPort(true); // TODO: Do we need this?
         recipeWebview.getSettings().setJavaScriptEnabled(true); // Apparently this is required, the page had issues loading until I added it
-        recipeWebview.loadUrl("https://www.allrecipes.com/recipe/260455/chicken-kebabs/");
+
+        String url = getIntent().getStringExtra("RECIPE_URL");
+        recipeWebview.loadUrl(url);
 
     }
 }
