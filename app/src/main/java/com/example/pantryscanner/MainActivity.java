@@ -9,6 +9,7 @@ import android.widget.Button;
 
 public class MainActivity extends AppCompatActivity {
     Button tempButton;
+    Button recipeButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,6 +22,14 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent i = new Intent(MainActivity.this, AddItemActivity.class);
                 startActivity(i);
+            }
+        });
+
+        recipeButton = findViewById(R.id.recipeButton);
+        recipeButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent i_recipe = new Intent(MainActivity.this, RecipeActivity.class);
+                startActivity(i_recipe);
             }
         });
     }
