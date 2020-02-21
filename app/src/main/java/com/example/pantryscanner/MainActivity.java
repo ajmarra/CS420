@@ -10,6 +10,7 @@ import android.widget.Button;
 public class MainActivity extends AppCompatActivity {
     Button tempButton;
     Button recipeButton;
+    Button pantryButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +31,14 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent i_recipe = new Intent(MainActivity.this, RecipeActivity.class);
                 startActivity(i_recipe);
+            }
+        });
+
+        pantryButton = findViewById(R.id.pantryButton);
+        pantryButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent i_pantry = new Intent(MainActivity.this, PantryActivity.class);
+                startActivity(i_pantry);
             }
         });
     }
