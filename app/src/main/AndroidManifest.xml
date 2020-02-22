@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.pantryscanner">
 
-    <uses-permission android:name="android.permission.INTERNET" /> <!-- TODO: Do we need this? -->
+<!--    <uses-permission android:name="android.permission.INTERNET" /> &lt;!&ndash; TODO: Do we need this? &ndash;&gt;-->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
