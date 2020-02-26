@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">PantryScanner</string>
+    <string name="my_app_id">smart_pantry-cnoei</string>
 </resources>

@@ -1,12 +1,6 @@
 package com.example.pantryscanner;
 
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.content.Intent;
-import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
 
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -18,7 +12,6 @@ import com.mongodb.stitch.android.core.auth.StitchUser;
 import com.mongodb.stitch.android.services.mongodb.remote.RemoteMongoClient;
 import com.mongodb.stitch.android.services.mongodb.remote.RemoteMongoCollection;
 import com.mongodb.stitch.core.auth.providers.anonymous.AnonymousCredential;
-import com.mongodb.stitch.core.services.mongodb.remote.RemoteInsertOneResult;
 import com.mongodb.stitch.core.services.mongodb.remote.RemoteUpdateOptions;
 import com.mongodb.stitch.core.services.mongodb.remote.RemoteUpdateResult;
 
@@ -27,26 +20,21 @@ import org.bson.Document;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
-    Button tempButton;
-    StitchAppClient client;
+public class MongoInitialization {
+    final StitchAppClient client =
+            Stitch.initializeDefaultAppClient("smart_pantry-cnoei");
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+    final RemoteMongoClient mongoClient =
+            client.getServiceClient(RemoteMongoClient.factory, "mongodb-atlas");
 
-//        MongoInitialization initialDB = new MongoInitialization();
-//        initialDB.initializeDB();
+    final RemoteMongoCollection<Document> coll =
+            mongoClient.getDatabase("help").getCollection("crying");
 
-        final StitchAppClient client =
-                Stitch.initializeDefaultAppClient("smart_pantry-cnoei");
+    public MongoInitialization() {
 
-        final RemoteMongoClient mongoClient =
-                client.getServiceClient(RemoteMongoClient.factory, "mongodb-atlas");
+    }
 
-        final RemoteMongoCollection<Document> coll =
-                mongoClient.getDatabase("help").getCollection("crying");
+    public void initializeDB() {
 
         client.getAuth().loginWithCredential(new AnonymousCredential()).continueWithTask(
                 new Continuation<StitchUser, Task<RemoteUpdateResult>>() {
@@ -93,15 +81,5 @@ public class MainActivity extends AppCompatActivity {
                 task.getException().printStackTrace();
             }
         });
-
-        tempButton = findViewById(R.id.tempButton);
-
-        tempButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                Intent i = new Intent(MainActivity.this, AddItemActivity.class);
-                startActivity(i);
-            }
-        });
-
     }
 }
