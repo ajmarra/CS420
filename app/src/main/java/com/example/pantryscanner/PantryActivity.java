@@ -1,11 +1,25 @@
 package com.example.pantryscanner;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.Executor;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 public class PantryActivity extends AppCompatActivity {
     Button recipeButton;
@@ -18,14 +32,93 @@ public class PantryActivity extends AppCompatActivity {
         recipeButton = findViewById(R.id.recipeButton);
         recipeButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-
-                String url = getRecipeURL();
-
-                Intent recipe_intent = new Intent(PantryActivity.this, RecipeActivity.class);
-                recipe_intent.putExtra("RECIPE_URL", url);
-                startActivity(recipe_intent);
+                try {
+                    if (ActivityCompat.checkSelfPermission(PantryActivity.this, Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(PantryActivity.this, new String[]{Manifest.permission.INTERNET}, 1);
+                    } else {
+                        invoke_recipe_pipeline();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
+    }
+
+    private void load_recipe_page(String recipe_url) {
+        Intent recipe_intent = new Intent(PantryActivity.this, RecipeActivity.class);
+        recipe_intent.putExtra("RECIPE_URL", recipe_url);
+        startActivity(recipe_intent);
+    }
+
+    private String choose_recipe(List<String> all_recipes, String mode) {
+        String chosen_recipe_url;
+        if (mode.equals("random")) {
+            Random rand = new Random();
+            chosen_recipe_url = all_recipes.get(rand.nextInt(all_recipes.size()));
+        } else {
+            System.out.println("Only random url selection currently implemented. Defaulting to random.");
+            Random rand = new Random();
+            chosen_recipe_url = all_recipes.get(rand.nextInt(all_recipes.size()));
+        }
+        return chosen_recipe_url;
+    }
+
+    private boolean is_recipe_url(String possible_recipe) {
+        String url_template = "https://www.allrecipes.com/recipe/";
+        return url_template.regionMatches(0, possible_recipe, 0, 34);
+    }
+
+    private List<String> parse_webpage(Document document) {
+        Elements links = document.select("a[href]");
+        List<String> recipe_urls = new ArrayList<String>();
+        for (Element link : links) {
+            // get the value from the href attribute
+            if (is_recipe_url(link.attr("href"))) {
+                System.out.println("link: " + link.attr("href"));
+                recipe_urls.add(link.attr("href"));
+            }
+        }
+        return recipe_urls;
+    }
+
+    public class Webscraper implements Runnable {
+        String scrape_url;
+
+        public Webscraper(String input_url) {
+            scrape_url = input_url;
+        }
+        public void webscrape() {
+            try {
+                // Plug this into a background thread (An asynchronous task)
+                Document document = Jsoup.connect(scrape_url).get();
+                List<String> recipe_urls = parse_webpage(document);
+                String mode = "random";
+                String chosen_recipe_url = choose_recipe(recipe_urls, mode);
+                load_recipe_page(chosen_recipe_url);
+
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void run() {
+            webscrape();
+        }
+    }
+
+    public class Invoker implements Executor {
+        @Override
+        public void execute(Runnable r) {
+            new Thread(r).start();
+        }
+    }
+
+    public void get_recipe_and_load_page(String search_url) {
+        Executor executor = new Invoker();
+        executor.execute(new Webscraper(search_url));
     }
 
     private String[] getIngredients() {
@@ -46,21 +139,11 @@ public class PantryActivity extends AppCompatActivity {
 
         search_url += postfix;
         return search_url;
+
     }
 
-    // Gets all recipe urls from allrecipes.com containing the specified ingredients
-    private String retrieveRecipeUrls(String search_url) {
-
-        return search_url;
-    }
-
-    // Gets a single recipe url that contains the requested ingredients
-    private String getRecipeURL() {
-
+    private void invoke_recipe_pipeline() {
         String search_url = constructSearchUrl(getIngredients());
-
-        String recipe_url = retrieveRecipeUrls(search_url);
-
-        return recipe_url;
+        get_recipe_and_load_page(search_url);
     }
 }

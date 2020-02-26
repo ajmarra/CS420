@@ -17,7 +17,7 @@ public class RecipeActivity extends AppCompatActivity {
 //        recipeWebview.getSettings().setLoadWithOverviewMode(true); // TODO: Do we need this?
 //        recipeWebview.getSettings().setUseWideViewPort(true); // TODO: Do we need this?
         recipeWebview.getSettings().setJavaScriptEnabled(true); // Apparently this is required, the page had issues loading until I added it
-
+        recipeWebview.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
         String url = getIntent().getStringExtra("RECIPE_URL");
         recipeWebview.loadUrl(url);
 
