@@ -54,6 +54,10 @@ public class AddItemActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
 
         myImageView = findViewById(R.id.imgview);
+        /*Bitmap myBitmap = BitmapFactory.decodeResource(
+                getApplicationContext().getResources(),
+                R.drawable.puppy);
+        myImageView.setImageBitmap(myBitmap);*/
 
         txtView = findViewById(R.id.txtContent);
 
@@ -67,6 +71,16 @@ public class AddItemActivity extends AppCompatActivity {
             return;
         }
 
+        /*frame = new Frame.Builder().setBitmap(myBitmap).build();
+        final SparseArray<Barcode> barcodes = detector.detect(frame);
+
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Barcode thisCode = barcodes.valueAt(0);
+                txtView.setText(thisCode.rawValue);
+            }
+        }); */
 
         openBtn.setOnClickListener(new View.OnClickListener() {
             @Override

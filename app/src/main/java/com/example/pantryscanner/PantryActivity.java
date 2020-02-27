@@ -14,6 +14,8 @@ import android.widget.Button;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -39,22 +41,40 @@ public class PantryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_pantry);
 
         // Initializing database
-        db = FirebaseFirestore.getInstance();
+//        db = FirebaseFirestore.getInstance();
+//
+//        DocumentReference docRef = db.collection("users").document("TEST");
+//        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+//            @Override
+//            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+//                if (task.isSuccessful()) {
+//                    DocumentSnapshot document = task.getResult();
+//                    if (document.exists()) {
+//                        Log.d("PantryActivity", "DocumentSnapshot data: " + document.getData());
+//                    } else {
+//                        Log.d("PantryActivity", "No such document");
+//                    }
+//                } else {
+//                    Log.d("PantryActivity", "get failed with ", task.getException());
+//                }
+//            }
+//        });
 
-        db.collection("users")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d("PantryActivity", document.getId() + " => " + document.getData());
-                            }
-                        } else {
-                            Log.w("PantryActivity", "Error getting documents.", task.getException());
-                        }
-                    }
-                });
+        // Gets all db entries
+//        db.collection("users")
+//                .get()
+//                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+//                        if (task.isSuccessful()) {
+//                            for (QueryDocumentSnapshot document : task.getResult()) {
+//                                Log.d("PantryActivity", document.getId() + " => " + document.getData());
+//                            }
+//                        } else {
+//                            Log.w("PantryActivity", "Error getting documents.", task.getException());
+//                        }
+//                    }
+//                });
 
         recipeButton = findViewById(R.id.recipeButton);
         recipeButton.setOnClickListener(new View.OnClickListener() {
