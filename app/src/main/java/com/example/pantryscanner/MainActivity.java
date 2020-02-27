@@ -16,7 +16,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     Button tempButton;
-    Button recipeButton;
+    Button pantryButton;
     private FirebaseAuth mAuth;
 
     // Choose authentication providers
@@ -41,11 +41,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        recipeButton = findViewById(R.id.recipeButton);
-        recipeButton.setOnClickListener(new View.OnClickListener() {
+        pantryButton = findViewById(R.id.pantryButton);
+        pantryButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Intent i_recipe = new Intent(MainActivity.this, RecipeActivity.class);
-                startActivity(i_recipe);
+                Intent pan_intent = new Intent(MainActivity.this, PantryActivity.class);
+                startActivity(pan_intent);
             }
         });
     }

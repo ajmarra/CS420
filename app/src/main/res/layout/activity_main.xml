@@ -25,12 +25,12 @@
         tools:ignore="MissingConstraints" />
 
     <Button
-        android:id="@+id/recipeButton"
+        android:id="@+id/pantryButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="21dp"
         android:layout_marginTop="93dp"
-        android:text="See Recipe Web View"
+        android:text="Visit Your Pantry"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
