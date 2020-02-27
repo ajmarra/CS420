@@ -1,5 +1,6 @@
 package com.example.pantryscanner;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
@@ -7,8 +8,15 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,11 +31,30 @@ import org.jsoup.select.Elements;
 
 public class PantryActivity extends AppCompatActivity {
     Button recipeButton;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pantry);
+
+        // Initializing database
+        db = FirebaseFirestore.getInstance();
+
+        db.collection("users")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.d("PantryActivity", document.getId() + " => " + document.getData());
+                            }
+                        } else {
+                            Log.w("PantryActivity", "Error getting documents.", task.getException());
+                        }
+                    }
+                });
 
         recipeButton = findViewById(R.id.recipeButton);
         recipeButton.setOnClickListener(new View.OnClickListener() {
