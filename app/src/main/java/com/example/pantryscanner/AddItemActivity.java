@@ -13,22 +13,32 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class AddItemActivity extends AppCompatActivity {
-    Button btn, openBtn, cameraBtn;
+    Button btn, openBtn, cameraBtn, addButton;
     TextView txtView;
     ImageView myImageView;
     Frame frame;
     BarcodeDetector detector;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +48,10 @@ public class AddItemActivity extends AppCompatActivity {
         btn = findViewById(R.id.button);
         openBtn = findViewById(R.id.uploadButton);
         cameraBtn = findViewById(R.id.cameraButton);
+        addButton = findViewById(R.id.addButton);
+
+        // Initializing database
+        db = FirebaseFirestore.getInstance();
 
         myImageView = findViewById(R.id.imgview);
         /*Bitmap myBitmap = BitmapFactory.decodeResource(
@@ -79,6 +93,32 @@ public class AddItemActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 switchToCamera();
+            }
+        });
+        addButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Create a new user with a first and last name
+                Map<String, Object> user = new HashMap<>();
+                user.put("first", "Ada");
+                user.put("last", "Lovelace");
+                user.put("born", 1815);
+
+                // Add a new document with a generated ID
+                db.collection("users")
+                        .add(user)
+                        .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                            @Override
+                            public void onSuccess(DocumentReference documentReference) {
+                                Log.d("MainActivity", "DocumentSnapshot added with ID: " + documentReference.getId());
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.w("MainActivity", "Error adding document", e);
+                            }
+                        });
             }
         });
 
