@@ -18,6 +18,7 @@ public class MainActivity extends AppCompatActivity {
     Button tempButton;
     Button recipeButton;
     private FirebaseAuth mAuth;
+
     // Choose authentication providers
     List<AuthUI.IdpConfig> providers = Arrays.asList(
             new AuthUI.IdpConfig.EmailBuilder().build(),
@@ -28,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Initialize Firebase Auth
+        //  Firebase Auth
         mAuth = FirebaseAuth.getInstance();
 
         tempButton = findViewById(R.id.tempButton);
