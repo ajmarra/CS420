@@ -104,21 +104,36 @@ public class AddItemActivity extends AppCompatActivity {
                 user.put("last", "Lovelace");
                 user.put("born", 1815);
 
-                // Add a new document with a generated ID
-                db.collection("users")
-                        .add(user)
-                        .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                db.collection("users").document("Testing")
+                        .set(user)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
-                            public void onSuccess(DocumentReference documentReference) {
-                                Log.d("MainActivity", "DocumentSnapshot added with ID: " + documentReference.getId());
+                            public void onSuccess(Void aVoid) {
+                                Log.d("PantryActivity", "DocumentSnapshot successfully written!");
                             }
                         })
                         .addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
-                                Log.w("MainActivity", "Error adding document", e);
+                                Log.w("PantryActivity", "Error writing document", e);
                             }
                         });
+
+                // Add a new document with a generated ID
+//                db.collection("users")
+//                        .add(user)
+//                        .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+//                            @Override
+//                            public void onSuccess(DocumentReference documentReference) {
+//                                Log.d("MainActivity", "DocumentSnapshot added with ID: " + documentReference.getId());
+//                            }
+//                        })
+//                        .addOnFailureListener(new OnFailureListener() {
+//                            @Override
+//                            public void onFailure(@NonNull Exception e) {
+//                                Log.w("MainActivity", "Error adding document", e);
+//                            }
+//                        });
             }
         });
 

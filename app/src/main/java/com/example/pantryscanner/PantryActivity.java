@@ -41,24 +41,25 @@ public class PantryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_pantry);
 
         // Initializing database
-//        db = FirebaseFirestore.getInstance();
-//
-//        DocumentReference docRef = db.collection("users").document("TEST");
-//        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-//            @Override
-//            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-//                if (task.isSuccessful()) {
-//                    DocumentSnapshot document = task.getResult();
-//                    if (document.exists()) {
-//                        Log.d("PantryActivity", "DocumentSnapshot data: " + document.getData());
-//                    } else {
-//                        Log.d("PantryActivity", "No such document");
-//                    }
-//                } else {
-//                    Log.d("PantryActivity", "get failed with ", task.getException());
-//                }
-//            }
-//        });
+        db = FirebaseFirestore.getInstance();
+
+        // Get's single document from collection
+        DocumentReference docRef = db.collection("users").document("Testing");
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        Log.d("PantryActivity", "DocumentSnapshot data: " + document.getData());
+                    } else {
+                        Log.d("PantryActivity", "No such document");
+                    }
+                } else {
+                    Log.d("PantryActivity", "get failed with ", task.getException());
+                }
+            }
+        });
 
         // Gets all db entries
 //        db.collection("users")
