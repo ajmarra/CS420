@@ -71,17 +71,6 @@ public class AddItemActivity extends AppCompatActivity {
             return;
         }
 
-        /*frame = new Frame.Builder().setBitmap(myBitmap).build();
-        final SparseArray<Barcode> barcodes = detector.detect(frame);
-
-        btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Barcode thisCode = barcodes.valueAt(0);
-                txtView.setText(thisCode.rawValue);
-            }
-        }); */
-
         openBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -99,41 +88,42 @@ public class AddItemActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Create a new user with a first and last name
-                Map<String, Object> user = new HashMap<>();
-                user.put("first", "Ada");
-                user.put("last", "Lovelace");
-                user.put("born", 1815);
+                Map<String, Object> item = new HashMap<>();
+                item.put("name", "apple");
+                item.put("type", "fruit");
+                item.put("quantity", 1);
 
-                db.collection("users").document("Testing")
-                        .set(user)
-                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                Log.d("PantryActivity", "DocumentSnapshot successfully written!");
-                            }
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.w("PantryActivity", "Error writing document", e);
-                            }
-                        });
-
-                // Add a new document with a generated ID
-//                db.collection("users")
-//                        .add(user)
-//                        .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                // Add a new document with a specified ID
+//                db.collection("pantry").document("apple")
+//                        .set(item)
+//                        .addOnSuccessListener(new OnSuccessListener<Void>() {
 //                            @Override
-//                            public void onSuccess(DocumentReference documentReference) {
-//                                Log.d("MainActivity", "DocumentSnapshot added with ID: " + documentReference.getId());
+//                            public void onSuccess(Void aVoid) {
+//                                Log.d("PantryActivity", "DocumentSnapshot successfully written!");
 //                            }
 //                        })
 //                        .addOnFailureListener(new OnFailureListener() {
 //                            @Override
 //                            public void onFailure(@NonNull Exception e) {
-//                                Log.w("MainActivity", "Error adding document", e);
+//                                Log.w("PantryActivity", "Error writing document", e);
 //                            }
 //                        });
+
+                // Add a new document with a generated ID
+                db.collection("users")
+                        .add(item)
+                        .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                            @Override
+                            public void onSuccess(DocumentReference documentReference) {
+                                Log.d("MainActivity", "DocumentSnapshot added with ID: " + documentReference.getId());
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.w("MainActivity", "Error adding document", e);
+                            }
+                        });
             }
         });
 

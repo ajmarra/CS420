@@ -7,10 +7,17 @@ import androidx.core.app.ActivityCompat;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.TableLayout;
+import android.widget.TableRow;
+import android.widget.TextView;
+
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -44,38 +51,22 @@ public class PantryActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
 
         // Get's single document from collection
-        DocumentReference docRef = db.collection("users").document("Testing");
-        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot document = task.getResult();
-                    if (document.exists()) {
-                        Log.d("PantryActivity", "DocumentSnapshot data: " + document.getData());
-                    } else {
-                        Log.d("PantryActivity", "No such document");
-                    }
-                } else {
-                    Log.d("PantryActivity", "get failed with ", task.getException());
-                }
-            }
-        });
-
-        // Gets all db entries
-//        db.collection("users")
-//                .get()
-//                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-//                        if (task.isSuccessful()) {
-//                            for (QueryDocumentSnapshot document : task.getResult()) {
-//                                Log.d("PantryActivity", document.getId() + " => " + document.getData());
-//                            }
-//                        } else {
-//                            Log.w("PantryActivity", "Error getting documents.", task.getException());
-//                        }
+//        DocumentReference docRef = db.collection("users").document("Testing");
+//        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+//            @Override
+//            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+//                if (task.isSuccessful()) {
+//                    DocumentSnapshot document = task.getResult();
+//                    if (document.exists()) {
+//                        Log.d("PantryActivity", "DocumentSnapshot data: " + document.getData());
+//                    } else {
+//                        Log.d("PantryActivity", "No such document");
 //                    }
-//                });
+//                } else {
+//                    Log.d("PantryActivity", "get failed with ", task.getException());
+//                }
+//            }
+//        });
 
         recipeButton = findViewById(R.id.recipeButton);
         recipeButton.setOnClickListener(new View.OnClickListener() {
@@ -91,6 +82,77 @@ public class PantryActivity extends AppCompatActivity {
                 }
             }
         });
+
+        init();
+    }
+
+    // Populates table with pantry data
+    private void init() {
+        final TableLayout stk = findViewById(R.id.displayLayout);
+        TableRow tbrow0 = new TableRow(this);
+        TextView tv0 = new TextView(this);
+        tv0.setText(" Item ID ");
+        tv0.setTextColor(Color.WHITE);
+        tbrow0.addView(tv0);
+        TextView tv1 = new TextView(this);
+        tv1.setText(" Item Name ");
+        tv1.setTextColor(Color.WHITE);
+        tbrow0.addView(tv1);
+        TextView tv2 = new TextView(this);
+        tv2.setText(" Edit Item ");
+        tv2.setTextColor(Color.WHITE);
+        tbrow0.addView(tv2);
+        TextView tv3 = new TextView(this);
+        tv3.setText(" Delete Item ");
+        tv3.setTextColor(Color.WHITE);
+        tbrow0.addView(tv3);
+        stk.addView(tbrow0);
+        // Gets all db entries
+        db.collection("users")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                final QueryDocumentSnapshot doc = document;
+                                Log.d("PantryActivity", document.getId() + " => " + document.getData());
+                                TableRow tbrow = new TableRow(PantryActivity.this);
+                                TextView t1v = new TextView(PantryActivity.this);
+                                t1v.setText(document.getId());
+                                t1v.setTextColor(Color.BLACK);
+                                t1v.setGravity(Gravity.CENTER);
+                                tbrow.addView(t1v);
+                                TextView t2v = new TextView(PantryActivity.this);
+                                t2v.setText(document.getString("name"));
+                                t2v.setTextColor(Color.BLACK);
+                                t2v.setGravity(Gravity.CENTER);
+                                tbrow.addView(t2v);
+                                ImageButton editBtn = new ImageButton(PantryActivity.this);
+                                editBtn.setImageResource(R.drawable.edit);
+                                editBtn.setOnClickListener(new View.OnClickListener() {
+                                    public void onClick(View v) {
+                                        System.out.println("Hi");
+                                    }
+                                });
+                                tbrow.addView(editBtn);
+                                ImageButton deleteBtn = new ImageButton(PantryActivity.this);
+                                deleteBtn.setImageResource(R.drawable.delete);
+                                deleteBtn.setOnClickListener(new View.OnClickListener() {
+                                    public void onClick(View v) {
+                                        System.out.println("Hi");
+                                        db.collection("users").document(doc.getId()).delete();
+                                    }
+                                });
+                                tbrow.addView(deleteBtn);
+                                stk.addView(tbrow);
+                            }
+                        } else {
+                            Log.w("PantryActivity", "Error getting documents.", task.getException());
+                        }
+                    }
+                });
+
     }
 
     private void load_recipe_page(String recipe_url) {
