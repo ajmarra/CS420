@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 
 import org.jsoup.Jsoup;
@@ -116,11 +117,6 @@ public class PantryActivity extends AppCompatActivity {
         }
     }
 
-    public void get_recipe_and_load_page(String search_url) {
-        Executor executor = new Invoker();
-        executor.execute(new Webscraper(search_url));
-    }
-
     private String[] getIngredients() {
         String[] ingredients = {"pork", "peppers", "rice", "onions"};
         return ingredients;
@@ -144,6 +140,8 @@ public class PantryActivity extends AppCompatActivity {
 
     private void invoke_recipe_pipeline() {
         String search_url = constructSearchUrl(getIngredients());
-        get_recipe_and_load_page(search_url);
+
+        Executor executor = new Invoker();
+        executor.execute(new Webscraper(search_url));
     }
 }

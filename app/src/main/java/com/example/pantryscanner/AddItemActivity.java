@@ -28,8 +28,18 @@ import com.google.android.gms.vision.barcode.BarcodeDetector;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executor;
 
 
 public class AddItemActivity extends AppCompatActivity {
@@ -49,7 +59,8 @@ public class AddItemActivity extends AppCompatActivity {
         openBtn = findViewById(R.id.uploadButton);
         cameraBtn = findViewById(R.id.cameraButton);
         addButton = findViewById(R.id.addButton);
-
+        interpret_upc("012000286209");
+        interpret_upc("079200731427");
         // Initializing database
         db = FirebaseFirestore.getInstance();
 
@@ -220,5 +231,95 @@ public class AddItemActivity extends AppCompatActivity {
     }
 
 
+//
+//    private String choose_recipe(List<String> all_recipes, String mode) {
+//        String chosen_recipe_url;
+//        if (mode.equals("random")) {
+//            Random rand = new Random();
+//            chosen_recipe_url = all_recipes.get(rand.nextInt(all_recipes.size()));
+//        } else {
+//            System.out.println("Only random url selection currently implemented. Defaulting to random.");
+//            Random rand = new Random();
+//            chosen_recipe_url = all_recipes.get(rand.nextInt(all_recipes.size()));
+//        }
+//        return chosen_recipe_url;
+//    }
+//
+//    private boolean is_recipe_url(String possible_recipe) {
+//        String url_template = "https://www.allrecipes.com/recipe/";
+//        return url_template.regionMatches(0, possible_recipe, 0, 34);
+//    }
+//
+//    private List<String> parse_webpage(Document document) {
+//        Elements links = document.select("a[href]");
+//        List<String> recipe_urls = new ArrayList<String>();
+//        for (Element link : links) {
+//            // get the value from the href attribute
+//            if (is_recipe_url(link.attr("href"))) {
+//                System.out.println("link: " + link.attr("href"));
+//                recipe_urls.add(link.attr("href"));
+//            }
+//        }
+//        return recipe_urls;
+//    }
+//
+//    public interface Callable {
+//        public void call(String param);
+//    }
+//
+//    class BarcodeScraper implements Callable {
+//        public void call(String scrape_url) {
+//            System.out.println( param );
+//        }
+//    }
+//
+//
+    private String parse_webpage(Document document) {
+        Elements b_sections = document.select("p > b");
 
+        List<String> possible_product_names = new ArrayList<String>();
+        for (Element b : b_sections) {
+            possible_product_names.add(b.text());
+        }
+        return possible_product_names.get(0);
+    }
+
+
+    public class Webscraper implements Runnable {
+        String scrape_url;
+
+        public Webscraper(String input_url) {
+            scrape_url = input_url;
+        }
+        public void webscrape() {
+            try {
+                // Plug this into a background thread (An asynchronous task)
+                Document document = Jsoup.connect(scrape_url).get();
+                String product_name = parse_webpage(document);
+                System.out.println(product_name);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void run() {
+            webscrape();
+        }
+    }
+
+    public class Invoker implements Executor {
+        @Override
+        public void execute(Runnable r) {
+            new Thread(r).start();
+        }
+    }
+
+    private void interpret_upc(String upc) {
+//        String upc_string = Integer.toString(upc);
+        String upc_search_url = "https://www.upcitemdb.com/upc/" + upc;
+
+        Executor executor = new Invoker();
+        executor.execute(new Webscraper(upc_search_url));
+    }
 }
