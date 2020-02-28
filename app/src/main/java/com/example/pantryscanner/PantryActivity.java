@@ -46,12 +46,14 @@ public class PantryActivity extends AppCompatActivity {
         });
     }
 
+    // Stores the selected recipe url in an intent and loads the recipe activity
     private void load_recipe_page(String recipe_url) {
         Intent recipe_intent = new Intent(PantryActivity.this, RecipeActivity.class);
         recipe_intent.putExtra("RECIPE_URL", recipe_url);
         startActivity(recipe_intent);
     }
 
+    // Selected a recipe from our list depending on the user's preference
     private String choose_recipe(List<String> all_recipes, String mode) {
         String chosen_recipe_url;
         if (mode.equals("random")) {
@@ -65,11 +67,13 @@ public class PantryActivity extends AppCompatActivity {
         return chosen_recipe_url;
     }
 
+    // Checks if a url links to a recipe (As opposed to an add or article)
     private boolean is_recipe_url(String possible_recipe) {
         String url_template = "https://www.allrecipes.com/recipe/";
         return url_template.regionMatches(0, possible_recipe, 0, 34);
     }
 
+    // Parses the html of a page, returning all recipe urls
     private List<String> parse_webpage(Document document) {
         Elements links = document.select("a[href]");
         List<String> recipe_urls = new ArrayList<String>();
@@ -83,6 +87,7 @@ public class PantryActivity extends AppCompatActivity {
         return recipe_urls;
     }
 
+    // A runnable that webscrapes allrecipes.com, selects a recipe and loads a new activity with it
     public class Webscraper implements Runnable {
         String scrape_url;
 
@@ -110,6 +115,7 @@ public class PantryActivity extends AppCompatActivity {
         }
     }
 
+    // An executor class that takes in a runnable and runs it on a new thread
     public class Invoker implements Executor {
         @Override
         public void execute(Runnable r) {
@@ -117,11 +123,14 @@ public class PantryActivity extends AppCompatActivity {
         }
     }
 
+    // Fetches the selected inredients from the ui
+    // TODO: Change hardcoded implementation
     private String[] getIngredients() {
         String[] ingredients = {"pork", "peppers", "rice", "onions"};
         return ingredients;
     }
 
+    // Takes in a list of ingredient strings and combines them into a search url
     private String constructSearchUrl(String[] ingredients) {
         String prefix = "https://www.allrecipes.com/search/results/?ingIncl=";
         String postfix = "&sort=re";
@@ -138,6 +147,7 @@ public class PantryActivity extends AppCompatActivity {
 
     }
 
+    // Suggests a tailored recipe and opens a webview with it
     private void invoke_recipe_pipeline() {
         String search_url = constructSearchUrl(getIngredients());
 
