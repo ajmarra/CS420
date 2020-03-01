@@ -19,6 +19,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -33,7 +34,7 @@ import java.util.Map;
 
 
 public class AddItemActivity extends AppCompatActivity {
-    Button btn, openBtn, cameraBtn, addButton;
+    Button btn, openBtn, cameraBtn, addButton, pantryButton;
     TextView txtView;
     ImageView myImageView;
     Frame frame;
@@ -54,10 +55,6 @@ public class AddItemActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
 
         myImageView = findViewById(R.id.imgview);
-        /*Bitmap myBitmap = BitmapFactory.decodeResource(
-                getApplicationContext().getResources(),
-                R.drawable.puppy);
-        myImageView.setImageBitmap(myBitmap);*/
 
         txtView = findViewById(R.id.txtContent);
 
@@ -70,6 +67,15 @@ public class AddItemActivity extends AppCompatActivity {
             txtView.setText("Could not set up the detector!");
             return;
         }
+
+        // Switch to PantryActivity
+        pantryButton = findViewById(R.id.pantryAct);
+        pantryButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent i = new Intent(AddItemActivity.this, PantryActivity.class);
+                startActivity(i);
+            }
+        });
 
         openBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -87,41 +93,26 @@ public class AddItemActivity extends AppCompatActivity {
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Create a new user with a first and last name
+                // Create a new pantry item for testing
                 Map<String, Object> item = new HashMap<>();
                 item.put("name", "apple");
                 item.put("type", "fruit");
                 item.put("quantity", 1);
 
-                // Add a new document with a specified ID
-//                db.collection("pantry").document("apple")
-//                        .set(item)
-//                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-//                            @Override
-//                            public void onSuccess(Void aVoid) {
-//                                Log.d("PantryActivity", "DocumentSnapshot successfully written!");
-//                            }
-//                        })
-//                        .addOnFailureListener(new OnFailureListener() {
-//                            @Override
-//                            public void onFailure(@NonNull Exception e) {
-//                                Log.w("PantryActivity", "Error writing document", e);
-//                            }
-//                        });
-
                 // Add a new document with a generated ID
-                db.collection("users")
+                db.collection("pantry")
                         .add(item)
                         .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                             @Override
                             public void onSuccess(DocumentReference documentReference) {
-                                Log.d("MainActivity", "DocumentSnapshot added with ID: " + documentReference.getId());
+                                Log.d("AddItemActivity", "DocumentSnapshot added with ID: " + documentReference.getId());
+                                Toast.makeText(AddItemActivity.this, "Item Added!", Toast.LENGTH_SHORT).show();
                             }
                         })
                         .addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
-                                Log.w("MainActivity", "Error adding document", e);
+                                Log.w("AddItemActivity", "Error adding document", e);
                             }
                         });
             }

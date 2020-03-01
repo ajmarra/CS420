@@ -13,12 +13,16 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
+import com.google.android.gms.common.util.ArrayUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
@@ -26,10 +30,13 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.SetOptions;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.Executor;
 
@@ -39,8 +46,11 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 public class PantryActivity extends AppCompatActivity {
-    Button recipeButton;
+    private Button recipeButton, addItemButton, submitButton;
+    private EditText editText;
     private FirebaseFirestore db;
+    private TableLayout tble;
+    private String[] toSearch = {};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,23 +60,20 @@ public class PantryActivity extends AppCompatActivity {
         // Initializing database
         db = FirebaseFirestore.getInstance();
 
-        // Get's single document from collection
-//        DocumentReference docRef = db.collection("users").document("Testing");
-//        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-//            @Override
-//            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-//                if (task.isSuccessful()) {
-//                    DocumentSnapshot document = task.getResult();
-//                    if (document.exists()) {
-//                        Log.d("PantryActivity", "DocumentSnapshot data: " + document.getData());
-//                    } else {
-//                        Log.d("PantryActivity", "No such document");
-//                    }
-//                } else {
-//                    Log.d("PantryActivity", "get failed with ", task.getException());
-//                }
-//            }
-//        });
+        // Makes the edit button and field invisible until needed
+        submitButton = findViewById(R.id.submitBtn);
+        editText = findViewById(R.id.editText);
+        submitButton.setVisibility(View.GONE);
+        editText.setVisibility(View.GONE);
+
+        // Switch to AddItemActivity
+        addItemButton = findViewById(R.id.addItemAct);
+        addItemButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent i = new Intent(PantryActivity.this, AddItemActivity.class);
+                startActivity(i);
+            }
+        } );
 
         recipeButton = findViewById(R.id.recipeButton);
         recipeButton.setOnClickListener(new View.OnClickListener() {
@@ -88,17 +95,17 @@ public class PantryActivity extends AppCompatActivity {
 
     // Populates table with pantry data
     private void init() {
-        final TableLayout stk = findViewById(R.id.displayLayout);
+        tble = findViewById(R.id.displayLayout);
         TableRow tbrow0 = new TableRow(this);
-        TextView tv0 = new TextView(this);
-        tv0.setText(" Item ID ");
-        tv0.setTextColor(Color.WHITE);
-        tbrow0.addView(tv0);
+        TextView tv = new TextView(this);
+        tv.setText(" Check Box ");
+        tv.setTextColor(Color.WHITE);
+        tbrow0.addView(tv);
         TextView tv1 = new TextView(this);
         tv1.setText(" Item Name ");
         tv1.setTextColor(Color.WHITE);
         tbrow0.addView(tv1);
-        TextView tv2 = new TextView(this);
+        TextView tv2 = new TextView(this);;
         tv2.setText(" Edit Item ");
         tv2.setTextColor(Color.WHITE);
         tbrow0.addView(tv2);
@@ -106,9 +113,9 @@ public class PantryActivity extends AppCompatActivity {
         tv3.setText(" Delete Item ");
         tv3.setTextColor(Color.WHITE);
         tbrow0.addView(tv3);
-        stk.addView(tbrow0);
+        tble.addView(tbrow0);
         // Gets all db entries
-        db.collection("users")
+        db.collection("pantry")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -116,23 +123,56 @@ public class PantryActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 final QueryDocumentSnapshot doc = document;
-                                Log.d("PantryActivity", document.getId() + " => " + document.getData());
-                                TableRow tbrow = new TableRow(PantryActivity.this);
-                                TextView t1v = new TextView(PantryActivity.this);
-                                t1v.setText(document.getId());
-                                t1v.setTextColor(Color.BLACK);
-                                t1v.setGravity(Gravity.CENTER);
-                                tbrow.addView(t1v);
-                                TextView t2v = new TextView(PantryActivity.this);
+                                final TableRow tbrow = new TableRow(PantryActivity.this);
+                                final CheckBox checkBox = new CheckBox(PantryActivity.this);
+                                final TextView t2v = new TextView(PantryActivity.this);
                                 t2v.setText(document.getString("name"));
                                 t2v.setTextColor(Color.BLACK);
                                 t2v.setGravity(Gravity.CENTER);
+                                checkBox.setOnClickListener(new View.OnClickListener() {
+                                    public void onClick(View v) {
+                                        // If it's been checked the it adds it to the array
+                                        if (((CheckBox) v).isChecked()) {
+                                            toSearch = ArrayUtils.appendToArray(toSearch, t2v.getText().toString());
+                                        }
+                                        // If it's been unchecked it removes that item from the array
+                                        else {
+                                            String[] temp = new String[toSearch.length - 1];
+                                            for (int i = 0, k = 0; i < toSearch.length; i++) {
+                                                if (toSearch[i] == doc.getString("name")) {
+                                                    continue;
+                                                }
+                                                temp[k++] = toSearch[i];
+                                            }
+                                            toSearch = temp;
+                                        }
+                                        System.out.println(ArrayUtils.toArrayList(toSearch));
+                                    }
+                                });
+                                tbrow.addView(checkBox);
                                 tbrow.addView(t2v);
+                                //If edit button is clicked then opens a text field with that item name
                                 ImageButton editBtn = new ImageButton(PantryActivity.this);
                                 editBtn.setImageResource(R.drawable.edit);
                                 editBtn.setOnClickListener(new View.OnClickListener() {
                                     public void onClick(View v) {
-                                        System.out.println("Hi");
+                                        submitButton.setVisibility(View.VISIBLE);
+                                        editText.setVisibility(View.VISIBLE);
+                                        editText.setText(doc.getString("name"));
+                                        submitButton.setOnClickListener(new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View v) {
+                                                Map<String, Object> data = new HashMap<>();
+                                                data.put("name", editText.getText().toString());
+                                                db.collection("pantry").document(doc.getId())
+                                                        .set(data);
+                                                t2v.setText(editText.getText().toString());
+                                                // Text field and button disappear when done.
+                                                submitButton.setVisibility(View.GONE);
+                                                editText.setVisibility(View.GONE);
+                                                Toast.makeText(PantryActivity.this, "Item Updated", Toast.LENGTH_LONG).show();
+                                            }
+                                        });
                                     }
                                 });
                                 tbrow.addView(editBtn);
@@ -140,12 +180,13 @@ public class PantryActivity extends AppCompatActivity {
                                 deleteBtn.setImageResource(R.drawable.delete);
                                 deleteBtn.setOnClickListener(new View.OnClickListener() {
                                     public void onClick(View v) {
-                                        System.out.println("Hi");
-                                        db.collection("users").document(doc.getId()).delete();
+                                        db.collection("pantry").document(doc.getId()).delete();
+                                        tble.removeView(tbrow);
+                                        Toast.makeText(PantryActivity.this, "Item Deleted", Toast.LENGTH_LONG).show();
                                     }
                                 });
                                 tbrow.addView(deleteBtn);
-                                stk.addView(tbrow);
+                                tble.addView(tbrow);
                             }
                         } else {
                             Log.w("PantryActivity", "Error getting documents.", task.getException());
@@ -232,8 +273,10 @@ public class PantryActivity extends AppCompatActivity {
     }
 
     private String[] getIngredients() {
+        // Hard coded for testing
         String[] ingredients = {"pork", "peppers", "rice", "onions"};
-        return ingredients;
+        if (toSearch.length == 0) Toast.makeText(PantryActivity.this, "Select an item!", Toast.LENGTH_LONG).show();
+        return toSearch;
     }
 
     private String constructSearchUrl(String[] ingredients) {
