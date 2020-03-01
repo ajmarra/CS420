@@ -174,8 +174,13 @@ public class AddItemActivity extends AppCompatActivity {
                         btn.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                Barcode thisCode = barcodes.valueAt(0);
-                                txtView.setText(thisCode.rawValue);
+                                if (barcodes.size() > 0) {
+                                    Barcode thisCode = barcodes.valueAt(0);
+                                    txtView.setText(thisCode.rawValue);
+                                }
+                                else {
+                                    Toast.makeText(AddItemActivity.this,"No Barcode Detected",Toast.LENGTH_SHORT).show();
+                                }
                             }
                         });
                     }
@@ -203,8 +208,13 @@ public class AddItemActivity extends AppCompatActivity {
                                 btn.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
-                                        Barcode thisCode = barcodes.valueAt(0);
-                                        txtView.setText(thisCode.rawValue);
+                                        if (barcodes.size() > 0) {
+                                            Barcode thisCode = barcodes.valueAt(0);
+                                            txtView.setText(thisCode.rawValue);
+                                        }
+                                        else {
+                                            Toast.makeText(AddItemActivity.this,"No Barcode Detected",Toast.LENGTH_SHORT).show();
+                                        }
                                     }
                                 });
                             }
