@@ -275,7 +275,6 @@ public class PantryActivity extends AppCompatActivity {
     private String[] getIngredients() {
         // Hard coded for testing
         String[] ingredients = {"pork", "peppers", "rice", "onions"};
-        if (toSearch.length == 0) Toast.makeText(PantryActivity.this, "Select an item!", Toast.LENGTH_LONG).show();
         return toSearch;
     }
 
