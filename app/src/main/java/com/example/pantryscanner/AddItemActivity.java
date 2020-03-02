@@ -241,6 +241,7 @@ public class AddItemActivity extends AppCompatActivity {
         }
     }
 
+    // Grabs product names from the upc interpreting website
     private List<String> parse_upc_webpage(Document document) {
         Elements b_sections = document.select("p > b");
         List<String> possible_product_names = new ArrayList<String>();
@@ -250,6 +251,7 @@ public class AddItemActivity extends AppCompatActivity {
         return possible_product_names;
     }
 
+    //  A callable class to pass into an asynchronous task with webscraping instructions
     public class BarcodeCallable implements Callable<Void> {
         private String search_url;
         private List<String> possible_product_names;
@@ -286,6 +288,7 @@ public class AddItemActivity extends AppCompatActivity {
         }
     }
 
+    // Builds class objects and executes methods to set off upc analysis, adds found product to textView
     private void interpret_upc(String upc) {
         String upc_search_url = "https://www.upcitemdb.com/upc/" + upc;
         Executor executor = new Invoker();
