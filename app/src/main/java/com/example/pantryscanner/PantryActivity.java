@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 
 import org.jsoup.Jsoup;
@@ -204,10 +205,12 @@ public class PantryActivity extends AppCompatActivity {
 
     private String choose_recipe(List<String> all_recipes, String mode) {
         String chosen_recipe_url;
-        if (mode.equals("random")) {
+        if (mode.equals("reviews")) {
+            // TODO: Implement review based recipe selection if we continue developing the app
             Random rand = new Random();
             chosen_recipe_url = all_recipes.get(rand.nextInt(all_recipes.size()));
         } else {
+            // Default to random recipe selection
             System.out.println("Only random url selection currently implemented. Defaulting to random.");
             Random rand = new Random();
             chosen_recipe_url = all_recipes.get(rand.nextInt(all_recipes.size()));
@@ -220,82 +223,74 @@ public class PantryActivity extends AppCompatActivity {
         return url_template.regionMatches(0, possible_recipe, 0, 34);
     }
 
-    private List<String> parse_webpage(Document document) {
+    private List<String> parse_recipe_webpage(Document document) {
         Elements links = document.select("a[href]");
         List<String> recipe_urls = new ArrayList<String>();
         for (Element link : links) {
             // get the value from the href attribute
             if (is_recipe_url(link.attr("href"))) {
-                System.out.println("link: " + link.attr("href"));
                 recipe_urls.add(link.attr("href"));
             }
         }
         return recipe_urls;
     }
 
-    public class Webscraper implements Runnable {
-        String scrape_url;
+    public class RecipeCallable implements Callable<Void> {
+        private String search_url;
 
-        public Webscraper(String input_url) {
-            scrape_url = input_url;
+        public RecipeCallable(String search_url) {
+            this.search_url = search_url;
         }
-        public void webscrape() {
+
+        @Override
+        public Void call() {
             try {
                 // Plug this into a background thread (An asynchronous task)
-                Document document = Jsoup.connect(scrape_url).get();
-                List<String> recipe_urls = parse_webpage(document);
-                String mode = "random";
-                String chosen_recipe_url = choose_recipe(recipe_urls, mode);
-                load_recipe_page(chosen_recipe_url);
-
-
+                Document document = Jsoup.connect(this.search_url).get();
+                List<String> recipe_urls = parse_recipe_webpage(document);
+                if (recipe_urls.isEmpty()) {
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), "No recipes found. Deselect some ingredients and try again", Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+                else {
+                    String mode = "random";
+                    String chosen_recipe_url = choose_recipe(recipe_urls, mode);
+                    load_recipe_page(chosen_recipe_url);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-
-        @Override
-        public void run() {
-            webscrape();
+            return null;
         }
     }
 
-    public class Invoker implements Executor {
-        @Override
-        public void execute(Runnable r) {
-            new Thread(r).start();
-        }
-    }
-
-    public void get_recipe_and_load_page(String search_url) {
-        Executor executor = new Invoker();
-        executor.execute(new Webscraper(search_url));
-    }
-
-    private String[] getIngredients() {
-        // Hard coded for testing
-        String[] ingredients = {"pork", "peppers", "rice", "onions"};
-        return toSearch;
-    }
-
-    private String constructSearchUrl(String[] ingredients) {
+    private String constructSearchUrl() {
         String prefix = "https://www.allrecipes.com/search/results/?ingIncl=";
         String postfix = "&sort=re";
         String search_url = prefix;
-        for(int i = 0; i < ingredients.length; i++) {
+        for(int i = 0; i < toSearch.length; i++) {
             if (i != 0) {
                 search_url += ',';
             }
-            search_url += ingredients[i];
+            search_url += toSearch[i];
         }
-
         search_url += postfix;
         return search_url;
 
     }
-
+    // Suggests a tailored recipe and opens a webview with it
     private void invoke_recipe_pipeline() {
-        String search_url = constructSearchUrl(getIngredients());
-        get_recipe_and_load_page(search_url);
+        if (toSearch.length > 0) {
+            String search_url = constructSearchUrl();
+            Executor executor = new Invoker();
+            Callable recipe_scrape_call = new RecipeCallable(search_url);
+            executor.execute(new Webscraper(recipe_scrape_call));
+        }
+        else {
+            Toast.makeText(getApplicationContext(),"Select at least one ingredient",Toast.LENGTH_SHORT).show();
+        }
     }
 }

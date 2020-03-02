@@ -29,13 +29,23 @@ import com.google.android.gms.vision.barcode.BarcodeDetector;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executor;
 
 
 public class AddItemActivity extends AppCompatActivity {
     Button btn, openBtn, cameraBtn, addButton, pantryButton;
-    TextView txtView;
+    TextView txtView, ingredientTxt;
     ImageView myImageView;
     Frame frame;
     BarcodeDetector detector;
@@ -57,6 +67,7 @@ public class AddItemActivity extends AppCompatActivity {
         myImageView = findViewById(R.id.imgview);
 
         txtView = findViewById(R.id.txtContent);
+        ingredientTxt = findViewById(R.id.editText2);
 
         // Creates the barcode detector
         detector =
@@ -93,28 +104,33 @@ public class AddItemActivity extends AppCompatActivity {
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Create a new pantry item for testing
-                Map<String, Object> item = new HashMap<>();
-                item.put("name", "apple");
-                item.put("type", "fruit");
-                item.put("quantity", 1);
+                if (ingredientTxt.getText().toString().equals("")) {
+                    Toast.makeText(getApplicationContext(), "Please Specify An Item To Add", Toast.LENGTH_LONG).show();
+                }
+                else {
+                    // Create a new pantry item for testing
+                    Map<String, Object> item = new HashMap<>();
+                    item.put("name", ingredientTxt.getText().toString());
+                    item.put("type", "unknown");
+                    item.put("quantity", 1);
 
-                // Add a new document with a generated ID
-                db.collection("pantry")
-                        .add(item)
-                        .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                            @Override
-                            public void onSuccess(DocumentReference documentReference) {
-                                Log.d("AddItemActivity", "DocumentSnapshot added with ID: " + documentReference.getId());
-                                Toast.makeText(AddItemActivity.this, "Item Added!", Toast.LENGTH_SHORT).show();
-                            }
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.w("AddItemActivity", "Error adding document", e);
-                            }
-                        });
+                    // Add a new document with a generated ID
+                    db.collection("pantry")
+                            .add(item)
+                            .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                @Override
+                                public void onSuccess(DocumentReference documentReference) {
+                                    Log.d("AddItemActivity", "DocumentSnapshot added with ID: " + documentReference.getId());
+                                    Toast.makeText(AddItemActivity.this, "Item Added!", Toast.LENGTH_SHORT).show();
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.w("AddItemActivity", "Error adding document", e);
+                                }
+                            });
+                }
             }
         });
 
@@ -171,18 +187,26 @@ public class AddItemActivity extends AppCompatActivity {
                         frame = new Frame.Builder().setBitmap(selectedImage).build();
                         final SparseArray<Barcode> barcodes = detector.detect(frame);
 
-                        btn.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                if (barcodes.size() > 0) {
-                                    Barcode thisCode = barcodes.valueAt(0);
-                                    txtView.setText(thisCode.rawValue);
-                                }
-                                else {
-                                    Toast.makeText(AddItemActivity.this,"No Barcode Detected",Toast.LENGTH_SHORT).show();
-                                }
-                            }
-                        });
+                        if (barcodes.size() > 0) {
+                            Barcode thisCode = barcodes.valueAt(0);
+                            interpret_upc(thisCode.rawValue);
+                        }
+                        else {
+                            Toast.makeText(AddItemActivity.this,"No Barcode Detected",Toast.LENGTH_SHORT).show();
+                        }
+
+//                        btn.setOnClickListener(new View.OnClickListener() {
+//                            @Override
+//                            public void onClick(View v) {
+//                                if (barcodes.size() > 0) {
+//                                    Barcode thisCode = barcodes.valueAt(0);
+//                                    txtView.setText(thisCode.rawValue);
+//                                }
+//                                else {
+//                                    Toast.makeText(AddItemActivity.this,"No Barcode Detected",Toast.LENGTH_SHORT).show();
+//                                }
+//                            }
+//                        });
                     }
 
                     break;
@@ -205,18 +229,26 @@ public class AddItemActivity extends AppCompatActivity {
                                 frame = new Frame.Builder().setBitmap(myBitmap).build();
                                 final SparseArray<Barcode> barcodes = detector.detect(frame);
 
-                                btn.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        if (barcodes.size() > 0) {
-                                            Barcode thisCode = barcodes.valueAt(0);
-                                            txtView.setText(thisCode.rawValue);
-                                        }
-                                        else {
-                                            Toast.makeText(AddItemActivity.this,"No Barcode Detected",Toast.LENGTH_SHORT).show();
-                                        }
-                                    }
-                                });
+                                if (barcodes.size() > 0) {
+                                    Barcode thisCode = barcodes.valueAt(0);
+                                    interpret_upc(thisCode.rawValue);
+                                }
+                                else {
+                                    Toast.makeText(AddItemActivity.this,"No Barcode Detected",Toast.LENGTH_SHORT).show();
+                                }
+
+//                                btn.setOnClickListener(new View.OnClickListener() {
+//                                    @Override
+//                                    public void onClick(View v) {
+//                                        if (barcodes.size() > 0) {
+//                                            Barcode thisCode = barcodes.valueAt(0);
+//                                            txtView.setText(thisCode.rawValue);
+//                                        }
+//                                        else {
+//                                            Toast.makeText(AddItemActivity.this,"No Barcode Detected",Toast.LENGTH_SHORT).show();
+//                                        }
+//                                    }
+//                                });
                             }
                         }
                     }
@@ -225,6 +257,51 @@ public class AddItemActivity extends AppCompatActivity {
         }
     }
 
+    private List<String> parse_upc_webpage(Document document) {
+        Elements b_sections = document.select("p > b");
+        List<String> possible_product_names = new ArrayList<String>();
+        for (Element b : b_sections) {
+            possible_product_names.add(b.text());
+        }
+        return possible_product_names;
+    }
 
+    public class BarcodeCallable implements Callable<Void> {
+        private String search_url;
 
+        public BarcodeCallable(String search_url) {
+            this.search_url = search_url;
+        }
+
+        @Override
+        public Void call() {
+            try {
+                Document document = Jsoup.connect(this.search_url).get();
+                List<String> possible_product_names = parse_upc_webpage(document);
+                if (possible_product_names.isEmpty()) {
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), "No Product Found For Pictured Barcode", Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+                else {
+                    ingredientTxt.setText(possible_product_names.get(0));
+                    ingredientTxt.invalidate();
+                    ingredientTxt.requestLayout();
+                }
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+    }
+
+    private void interpret_upc(String upc) {
+        String upc_search_url = "https://www.upcitemdb.com/upc/" + upc;
+        Executor executor = new Invoker();
+        Callable barcode_scrape_call = new BarcodeCallable(upc_search_url);
+        executor.execute(new Webscraper(barcode_scrape_call));
+    }
 }
