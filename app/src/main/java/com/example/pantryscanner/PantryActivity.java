@@ -197,12 +197,14 @@ public class PantryActivity extends AppCompatActivity {
 
     }
 
+    // Passes the selected recipe url into an intent and loads the RecipeActivity
     private void load_recipe_page(String recipe_url) {
         Intent recipe_intent = new Intent(PantryActivity.this, RecipeActivity.class);
         recipe_intent.putExtra("RECIPE_URL", recipe_url);
         startActivity(recipe_intent);
     }
 
+    // Selects one of the found recipes using the specified criteria
     private String choose_recipe(List<String> all_recipes, String mode) {
         String chosen_recipe_url;
         if (mode.equals("reviews")) {
@@ -218,11 +220,12 @@ public class PantryActivity extends AppCompatActivity {
         return chosen_recipe_url;
     }
 
+    // Checks whether a found link is for a new recipe
     private boolean is_recipe_url(String possible_recipe) {
         String url_template = "https://www.allrecipes.com/recipe/";
         return url_template.regionMatches(0, possible_recipe, 0, 34);
     }
-
+    // Grabs product names from the recipe search website
     private List<String> parse_recipe_webpage(Document document) {
         Elements links = document.select("a[href]");
         List<String> recipe_urls = new ArrayList<String>();
@@ -235,6 +238,7 @@ public class PantryActivity extends AppCompatActivity {
         return recipe_urls;
     }
 
+    //  A callable class to pass into an asynchronous task with webscraping instructions
     public class RecipeCallable implements Callable<Void> {
         private String search_url;
 
@@ -267,6 +271,7 @@ public class PantryActivity extends AppCompatActivity {
         }
     }
 
+    // Builds a url string by concatenating ingredients and commas
     private String constructSearchUrl() {
         String prefix = "https://www.allrecipes.com/search/results/?ingIncl=";
         String postfix = "&sort=re";
@@ -290,6 +295,7 @@ public class PantryActivity extends AppCompatActivity {
         return search_url;
 
     }
+
     // Suggests a tailored recipe and opens a webview with it
     private void invoke_recipe_pipeline() {
         if (toSearch.length > 0) {
@@ -299,6 +305,7 @@ public class PantryActivity extends AppCompatActivity {
             executor.execute(new Webscraper(recipe_scrape_call));
         }
         else {
+            // At least one ingredient must be selected to suggest a recipe
             Toast.makeText(getApplicationContext(),"Select At Least One Ingredient",Toast.LENGTH_SHORT).show();
         }
     }

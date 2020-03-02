@@ -45,9 +45,7 @@ import java.util.concurrent.Executor;
 
 
 public class AddItemActivity extends AppCompatActivity {
-    Button btn;
     Button openBtn, cameraBtn, addButton, pantryButton;
-//    TextView txtView;
     TextView instructTxt, ingredientTxt;
     ImageView myImageView;
     Frame frame;
@@ -93,6 +91,7 @@ public class AddItemActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (ingredientTxt.getText().toString().equals("")) {
                     Toast.makeText(getApplicationContext(), "Please Specify An Item To Add", Toast.LENGTH_LONG).show();
+                    interpret_upc("792850110991");
                 }
                 else {
                     // Create a new pantry item for testing
@@ -204,19 +203,6 @@ public class AddItemActivity extends AppCompatActivity {
                         else {
                             Toast.makeText(AddItemActivity.this,"No Barcode Detected",Toast.LENGTH_SHORT).show();
                         }
-
-//                        btn.setOnClickListener(new View.OnClickListener() {
-//                            @Override
-//                            public void onClick(View v) {
-//                                if (barcodes.size() > 0) {
-//                                    Barcode thisCode = barcodes.valueAt(0);
-//                                    txtView.setText(thisCode.rawValue);
-//                                }
-//                                else {
-//                                    Toast.makeText(AddItemActivity.this,"No Barcode Detected",Toast.LENGTH_SHORT).show();
-//                                }
-//                            }
-//                        });
                     }
 
                     break;
@@ -247,19 +233,6 @@ public class AddItemActivity extends AppCompatActivity {
                                 else {
                                     Toast.makeText(AddItemActivity.this,"No Barcode Detected",Toast.LENGTH_SHORT).show();
                                 }
-
-//                                btn.setOnClickListener(new View.OnClickListener() {
-//                                    @Override
-//                                    public void onClick(View v) {
-//                                        if (barcodes.size() > 0) {
-//                                            Barcode thisCode = barcodes.valueAt(0);
-//                                            interpret_upc(thisCode.rawValue);
-//                                        }
-//                                        else {
-//                                            Toast.makeText(AddItemActivity.this,"No Barcode Detected",Toast.LENGTH_SHORT).show();
-//                                        }
-//                                    }
-//                                });
                             }
                         }
                     }
@@ -268,6 +241,7 @@ public class AddItemActivity extends AppCompatActivity {
         }
     }
 
+    // Grabs product names from the upc interpreting website
     private List<String> parse_upc_webpage(Document document) {
         Elements b_sections = document.select("p > b");
         List<String> possible_product_names = new ArrayList<String>();
@@ -277,8 +251,10 @@ public class AddItemActivity extends AppCompatActivity {
         return possible_product_names;
     }
 
+    //  A callable class to pass into an asynchronous task with webscraping instructions
     public class BarcodeCallable implements Callable<Void> {
         private String search_url;
+        private List<String> possible_product_names;
 
         public BarcodeCallable(String search_url) {
             this.search_url = search_url;
@@ -288,7 +264,7 @@ public class AddItemActivity extends AppCompatActivity {
         public Void call() {
             try {
                 Document document = Jsoup.connect(this.search_url).get();
-                List<String> possible_product_names = parse_upc_webpage(document);
+                possible_product_names = parse_upc_webpage(document);
                 if (possible_product_names.isEmpty()) {
                     runOnUiThread(new Runnable() {
                         public void run() {
@@ -297,10 +273,12 @@ public class AddItemActivity extends AppCompatActivity {
                     });
                 }
                 else {
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                        ingredientTxt.setText(possible_product_names.get(0));
+                        }
+                    });
 
-                    ingredientTxt.setText(possible_product_names.get(0));
-                    ingredientTxt.invalidate();
-                    ingredientTxt.requestLayout();
                 }
             }
             catch (IOException e) {
@@ -310,6 +288,7 @@ public class AddItemActivity extends AppCompatActivity {
         }
     }
 
+    // Builds class objects and executes methods to set off upc analysis, adds found product to textView
     private void interpret_upc(String upc) {
         String upc_search_url = "https://www.upcitemdb.com/upc/" + upc;
         Executor executor = new Invoker();
