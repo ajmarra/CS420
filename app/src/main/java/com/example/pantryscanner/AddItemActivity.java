@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
@@ -44,7 +45,7 @@ import java.util.concurrent.Executor;
 
 
 public class AddItemActivity extends AppCompatActivity {
-    // Button btn;
+    Button btn;
     Button openBtn, cameraBtn, addButton, pantryButton;
 //    TextView txtView;
     TextView instructTxt, ingredientTxt;
@@ -58,7 +59,6 @@ public class AddItemActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_item_activity);
 
-//        btn = findViewById(R.id.button);
         openBtn = findViewById(R.id.uploadButton);
         cameraBtn = findViewById(R.id.cameraButton);
         addButton = findViewById(R.id.addButton);
@@ -74,8 +74,8 @@ public class AddItemActivity extends AppCompatActivity {
 
         // Creates the barcode detector
         detector =
-                new BarcodeDetector.Builder(getApplicationContext())
-                        .setBarcodeFormats(Barcode.DATA_MATRIX | Barcode.QR_CODE)
+                new BarcodeDetector.Builder(this)
+                        .setBarcodeFormats(Barcode.ALL_FORMATS)
                         .build();
 
 
@@ -126,6 +126,8 @@ public class AddItemActivity extends AppCompatActivity {
             return;
         }
         instructTxt.setText("Scan a barcode or enter your product manually!");
+
+
 
         openBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -194,6 +196,7 @@ public class AddItemActivity extends AppCompatActivity {
                         frame = new Frame.Builder().setBitmap(selectedImage).build();
                         final SparseArray<Barcode> barcodes = detector.detect(frame);
 
+
                         if (barcodes.size() > 0) {
                             Barcode thisCode = barcodes.valueAt(0);
                             interpret_upc(thisCode.rawValue);
@@ -239,6 +242,7 @@ public class AddItemActivity extends AppCompatActivity {
                                 if (barcodes.size() > 0) {
                                     Barcode thisCode = barcodes.valueAt(0);
                                     interpret_upc(thisCode.rawValue);
+
                                 }
                                 else {
                                     Toast.makeText(AddItemActivity.this,"No Barcode Detected",Toast.LENGTH_SHORT).show();
@@ -249,7 +253,7 @@ public class AddItemActivity extends AppCompatActivity {
 //                                    public void onClick(View v) {
 //                                        if (barcodes.size() > 0) {
 //                                            Barcode thisCode = barcodes.valueAt(0);
-//                                            txtView.setText(thisCode.rawValue);
+//                                            interpret_upc(thisCode.rawValue);
 //                                        }
 //                                        else {
 //                                            Toast.makeText(AddItemActivity.this,"No Barcode Detected",Toast.LENGTH_SHORT).show();
@@ -293,6 +297,7 @@ public class AddItemActivity extends AppCompatActivity {
                     });
                 }
                 else {
+
                     ingredientTxt.setText(possible_product_names.get(0));
                     ingredientTxt.invalidate();
                     ingredientTxt.requestLayout();
