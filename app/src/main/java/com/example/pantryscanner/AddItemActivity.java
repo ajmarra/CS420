@@ -91,7 +91,6 @@ public class AddItemActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (ingredientTxt.getText().toString().equals("")) {
                     Toast.makeText(getApplicationContext(), "Please Specify An Item To Add", Toast.LENGTH_LONG).show();
-                    interpret_upc("792850110991");
                 }
                 else {
                     // Create a new pantry item for testing
