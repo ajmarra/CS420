@@ -251,7 +251,7 @@ public class PantryActivity extends AppCompatActivity {
                 if (recipe_urls.isEmpty()) {
                     runOnUiThread(new Runnable() {
                         public void run() {
-                            Toast.makeText(getApplicationContext(), "No recipes found. Deselect some ingredients and try again", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), "No Recipes Found. Deselect Some Ingredients And Try Again", Toast.LENGTH_LONG).show();
                         }
                     });
                 }
@@ -290,7 +290,7 @@ public class PantryActivity extends AppCompatActivity {
             executor.execute(new Webscraper(recipe_scrape_call));
         }
         else {
-            Toast.makeText(getApplicationContext(),"Select at least one ingredient",Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(),"Select At Least One Ingredient",Toast.LENGTH_SHORT).show();
         }
     }
 }

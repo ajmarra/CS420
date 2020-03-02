@@ -44,8 +44,10 @@ import java.util.concurrent.Executor;
 
 
 public class AddItemActivity extends AppCompatActivity {
-    Button btn, openBtn, cameraBtn, addButton, pantryButton;
-    TextView txtView, ingredientTxt;
+    // Button btn;
+    Button openBtn, cameraBtn, addButton, pantryButton;
+//    TextView txtView;
+    TextView instructTxt, ingredientTxt;
     ImageView myImageView;
     Frame frame;
     BarcodeDetector detector;
@@ -56,7 +58,7 @@ public class AddItemActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_item_activity);
 
-        btn = findViewById(R.id.button);
+//        btn = findViewById(R.id.button);
         openBtn = findViewById(R.id.uploadButton);
         cameraBtn = findViewById(R.id.cameraButton);
         addButton = findViewById(R.id.addButton);
@@ -66,7 +68,8 @@ public class AddItemActivity extends AppCompatActivity {
 
         myImageView = findViewById(R.id.imgview);
 
-        txtView = findViewById(R.id.txtContent);
+//        txtView = findViewById(R.id.txtContent);
+        instructTxt = findViewById(R.id.textView2);
         ingredientTxt = findViewById(R.id.editText2);
 
         // Creates the barcode detector
@@ -74,10 +77,7 @@ public class AddItemActivity extends AppCompatActivity {
                 new BarcodeDetector.Builder(getApplicationContext())
                         .setBarcodeFormats(Barcode.DATA_MATRIX | Barcode.QR_CODE)
                         .build();
-        if(!detector.isOperational()){
-            txtView.setText("Could not set up the detector!");
-            return;
-        }
+
 
         // Switch to PantryActivity
         pantryButton = findViewById(R.id.pantryAct);
@@ -88,19 +88,6 @@ public class AddItemActivity extends AppCompatActivity {
             }
         });
 
-        openBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                uploadImage();
-            }
-        });
-        cameraBtn.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                switchToCamera();
-            }
-        });
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -130,7 +117,27 @@ public class AddItemActivity extends AppCompatActivity {
                                     Log.w("AddItemActivity", "Error adding document", e);
                                 }
                             });
+                    ingredientTxt.setText("");
                 }
+            }
+        });
+        if(!detector.isOperational()){
+            instructTxt.setText("Could not set up the detector! Manual submission only");
+            return;
+        }
+        instructTxt.setText("Scan a barcode or enter your product manually!");
+
+        openBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                uploadImage();
+            }
+        });
+        cameraBtn.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                switchToCamera();
             }
         });
 

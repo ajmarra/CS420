@@ -35,7 +35,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="68dp"
-            android:layout_marginTop="180dp"
+            android:layout_marginTop="160dp"
             android:text="Open Camera"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -44,11 +44,11 @@
             android:id="@+id/addButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="160dp"
-            android:layout_marginBottom="220dp"
+            android:layout_marginStart="161dp"
+            android:layout_marginTop="428dp"
             android:text="Add Item"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/imgview"
@@ -63,7 +63,7 @@
             android:id="@+id/uploadButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="180dp"
+            android:layout_marginTop="160dp"
             android:layout_marginEnd="64dp"
             android:text="Upload Image"
             app:layout_constraintEnd_toEndOf="parent"
@@ -73,23 +73,26 @@
             android:id="@+id/pantryAct"
             android:layout_width="123dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="144dp"
+            android:layout_marginTop="528dp"
             android:layout_marginEnd="144dp"
-            android:layout_marginBottom="64dp"
             android:text="View Pantry"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <EditText
             android:id="@+id/editText2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="99dp"
-            android:layout_marginBottom="312dp"
+            android:layout_marginStart="96dp"
+            android:layout_marginTop="340dp"
             android:ems="10"
             android:hint="Add ingredient name"
             android:inputType="textPersonName"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/textView2"
