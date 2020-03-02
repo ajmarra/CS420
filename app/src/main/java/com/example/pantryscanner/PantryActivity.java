@@ -271,11 +271,20 @@ public class PantryActivity extends AppCompatActivity {
         String prefix = "https://www.allrecipes.com/search/results/?ingIncl=";
         String postfix = "&sort=re";
         String search_url = prefix;
+        String new_ingredient;
+        String[] list_of_words;
         for(int i = 0; i < toSearch.length; i++) {
             if (i != 0) {
                 search_url += ',';
             }
-            search_url += toSearch[i];
+            new_ingredient = toSearch[i].replaceAll("[^a-zA-Z]", " ");
+            list_of_words = new_ingredient.split(" ");
+            for(int j = 0; j < list_of_words.length; j++) {
+                if (j != 0) {
+                    search_url += ',';
+                }
+                search_url += list_of_words[j];
+            }
         }
         search_url += postfix;
         return search_url;
