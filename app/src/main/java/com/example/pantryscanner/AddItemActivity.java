@@ -14,7 +14,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.util.SparseArray;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -23,12 +22,15 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.vision.Detector;
+import com.google.android.gms.tasks.Task;
 import com.google.android.gms.vision.Frame;
-import com.google.android.gms.vision.barcode.Barcode;
-import com.google.android.gms.vision.barcode.BarcodeDetector;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.ml.vision.FirebaseVision;
+import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode;
+import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetector;
+import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetectorOptions;
+import com.google.firebase.ml.vision.common.FirebaseVisionImage;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -48,8 +50,6 @@ public class AddItemActivity extends AppCompatActivity {
     Button openBtn, cameraBtn, addButton, pantryButton;
     TextView instructTxt, ingredientTxt;
     ImageView myImageView;
-    Frame frame;
-    BarcodeDetector detector;
     private FirebaseFirestore db;
 
     @Override
@@ -66,14 +66,14 @@ public class AddItemActivity extends AppCompatActivity {
 
         myImageView = findViewById(R.id.imgview);
 
-//        txtView = findViewById(R.id.txtContent);
         instructTxt = findViewById(R.id.textView2);
         ingredientTxt = findViewById(R.id.editText2);
 
         // Creates the barcode detector
-        detector =
-                new BarcodeDetector.Builder(this)
-                        .setBarcodeFormats(Barcode.ALL_FORMATS)
+        FirebaseVisionBarcodeDetectorOptions options =
+                new FirebaseVisionBarcodeDetectorOptions.Builder()
+                        .setBarcodeFormats(
+                                FirebaseVisionBarcode.FORMAT_ALL_FORMATS)
                         .build();
 
 
@@ -119,10 +119,7 @@ public class AddItemActivity extends AppCompatActivity {
                 }
             }
         });
-        if(!detector.isOperational()){
-            instructTxt.setText("Could not set up the detector! Manual submission only");
-            return;
-        }
+
         instructTxt.setText("Scan a barcode or enter your product manually!");
 
 
@@ -190,18 +187,24 @@ public class AddItemActivity extends AppCompatActivity {
                         Bitmap selectedImage = (Bitmap) data.getExtras().get("data");
                         myImageView.setImageBitmap(selectedImage);
 
-                        // Barcode button can only be used if there is a photo present to analyze
-                        frame = new Frame.Builder().setBitmap(selectedImage).build();
-                        final SparseArray<Barcode> barcodes = detector.detect(frame);
-
-
-                        if (barcodes.size() > 0) {
-                            Barcode thisCode = barcodes.valueAt(0);
-                            interpret_upc(thisCode.rawValue);
-                        }
-                        else {
-                            Toast.makeText(AddItemActivity.this,"No Barcode Detected",Toast.LENGTH_SHORT).show();
-                        }
+                        // Sets image to scan
+                        FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(selectedImage);
+                        FirebaseVisionBarcodeDetector detector = FirebaseVision.getInstance()
+                                .getVisionBarcodeDetector();
+                        // If barcode detected then it webscrapes the upc site
+                        Task<List<FirebaseVisionBarcode>> result = detector.detectInImage(image)
+                                .addOnSuccessListener(new OnSuccessListener<List<FirebaseVisionBarcode>>() {
+                                    @Override
+                                    public void onSuccess(List<FirebaseVisionBarcode> barcodes) {
+                                        if (barcodes.size() > 0) {
+                                            FirebaseVisionBarcode thisCode = barcodes.get(0);
+                                            interpret_upc(thisCode.getRawValue());
+                                        }
+                                        else {
+                                            Toast.makeText(AddItemActivity.this,"No Barcode Detected",Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+                                });
                     }
 
                     break;
@@ -220,18 +223,24 @@ public class AddItemActivity extends AppCompatActivity {
                                 myImageView.setImageBitmap(myBitmap);
                                 cursor.close();
 
-                                // Barcode button can only be used if there is a photo present to analyze
-                                frame = new Frame.Builder().setBitmap(myBitmap).build();
-                                final SparseArray<Barcode> barcodes = detector.detect(frame);
-
-                                if (barcodes.size() > 0) {
-                                    Barcode thisCode = barcodes.valueAt(0);
-                                    interpret_upc(thisCode.rawValue);
-
-                                }
-                                else {
-                                    Toast.makeText(AddItemActivity.this,"No Barcode Detected",Toast.LENGTH_SHORT).show();
-                                }
+                                // Sets the image to scan
+                                FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(myBitmap);
+                                FirebaseVisionBarcodeDetector detector = FirebaseVision.getInstance()
+                                        .getVisionBarcodeDetector();
+                                // If barcode detected then it webscrapes the upc site
+                                Task<List<FirebaseVisionBarcode>> result = detector.detectInImage(image)
+                                        .addOnSuccessListener(new OnSuccessListener<List<FirebaseVisionBarcode>>() {
+                                            @Override
+                                            public void onSuccess(List<FirebaseVisionBarcode> barcodes) {
+                                                if (barcodes.size() > 0) {
+                                                    FirebaseVisionBarcode thisCode = barcodes.get(0);
+                                                    interpret_upc(thisCode.getRawValue());
+                                                }
+                                                else {
+                                                    Toast.makeText(AddItemActivity.this,"No Barcode Detected",Toast.LENGTH_SHORT).show();
+                                                }
+                                            }
+                                        });
                             }
                         }
                     }

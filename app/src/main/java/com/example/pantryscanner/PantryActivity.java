@@ -28,11 +28,13 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -132,22 +134,7 @@ public class PantryActivity extends AppCompatActivity {
                                 t2v.setGravity(Gravity.CENTER);
                                 checkBox.setOnClickListener(new View.OnClickListener() {
                                     public void onClick(View v) {
-                                        // If it's been checked the it adds it to the array
-                                        if (((CheckBox) v).isChecked()) {
-                                            toSearch = ArrayUtils.appendToArray(toSearch, t2v.getText().toString());
-                                        }
-                                        // If it's been unchecked it removes that item from the array
-                                        else {
-                                            String[] temp = new String[toSearch.length - 1];
-                                            for (int i = 0, k = 0; i < toSearch.length; i++) {
-                                                if (toSearch[i] == doc.getString("name")) {
-                                                    continue;
-                                                }
-                                                temp[k++] = toSearch[i];
-                                            }
-                                            toSearch = temp;
-                                        }
-                                        System.out.println(ArrayUtils.toArrayList(toSearch));
+                                        handleSelectedCheckBox(doc, v, t2v);
                                     }
                                 });
                                 tbrow.addView(checkBox);
@@ -157,23 +144,7 @@ public class PantryActivity extends AppCompatActivity {
                                 editBtn.setImageResource(R.drawable.edit);
                                 editBtn.setOnClickListener(new View.OnClickListener() {
                                     public void onClick(View v) {
-                                        submitButton.setVisibility(View.VISIBLE);
-                                        editText.setVisibility(View.VISIBLE);
-                                        editText.setText(doc.getString("name"));
-                                        submitButton.setOnClickListener(new View.OnClickListener() {
-                                            @Override
-                                            public void onClick(View v) {
-                                                Map<String, Object> data = new HashMap<>();
-                                                data.put("name", editText.getText().toString());
-                                                db.collection("pantry").document(doc.getId())
-                                                        .set(data);
-                                                t2v.setText(editText.getText().toString());
-                                                // Text field and button disappear when done.
-                                                submitButton.setVisibility(View.GONE);
-                                                editText.setVisibility(View.GONE);
-                                                Toast.makeText(PantryActivity.this, "Item Updated", Toast.LENGTH_LONG).show();
-                                            }
-                                        });
+                                        editItem(doc, t2v);
                                     }
                                 });
                                 tbrow.addView(editBtn);
@@ -195,6 +166,49 @@ public class PantryActivity extends AppCompatActivity {
                     }
                 });
 
+    }
+
+    // Adds or removes items from the toSearch list when items are checked or unchecked
+    private void handleSelectedCheckBox(QueryDocumentSnapshot doc, View v, TextView tv) {
+        // If it's been checked the it adds it to the array
+        if (((CheckBox) v).isChecked()) {
+            toSearch = ArrayUtils.appendToArray(toSearch, tv.getText().toString());
+        }
+        // If it's been unchecked it removes that item from the array
+        else {
+            String[] temp = new String[toSearch.length - 1];
+            for (int i = 0, k = 0; i < toSearch.length; i++) {
+                if (toSearch[i] == doc.getString("name")) {
+                    continue;
+                }
+                temp[k++] = toSearch[i];
+            }
+            toSearch = temp;
+        }
+        System.out.println(ArrayUtils.toArrayList(toSearch).toString());
+    }
+
+    // Opens a field to edit an existing item in the database
+    private void editItem (QueryDocumentSnapshot doc, TextView tv) {
+        final TextView tv1 = tv;
+        final QueryDocumentSnapshot doc1 = doc;
+        submitButton.setVisibility(View.VISIBLE);
+        editText.setVisibility(View.VISIBLE);
+        editText.setText(doc.getString("name"));
+        submitButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Map<String, Object> data = new HashMap<>();
+                data.put("name", editText.getText().toString());
+                db.collection("pantry").document(doc1.getId())
+                        .set(data);
+                tv1.setText(editText.getText().toString());
+                // Text field and button disappear when done.
+                submitButton.setVisibility(View.GONE);
+                editText.setVisibility(View.GONE);
+                Toast.makeText(PantryActivity.this, "Item Updated", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     // Passes the selected recipe url into an intent and loads the RecipeActivity
