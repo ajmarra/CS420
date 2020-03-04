@@ -24,17 +24,16 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.util.ArrayUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.SetOptions;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -53,12 +52,17 @@ public class PantryActivity extends AppCompatActivity {
     private EditText editText;
     private FirebaseFirestore db;
     private TableLayout tble;
+    private String userId;
     private String[] toSearch = {};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pantry);
+
+        // Gets the userID
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        userId = auth.getUid();
 
         // Initializing database
         db = FirebaseFirestore.getInstance();
@@ -101,12 +105,13 @@ public class PantryActivity extends AppCompatActivity {
         tble = findViewById(R.id.displayLayout);
         TableRow tbrow0 = new TableRow(this);
         TextView tv = new TextView(this);
-        tv.setText(" Check Box ");
+        tv.setText("Check Box ");
         tv.setTextColor(Color.WHITE);
         tbrow0.addView(tv);
         TextView tv1 = new TextView(this);
         tv1.setText(" Item Name ");
         tv1.setTextColor(Color.WHITE);
+        tv1.setGravity(Gravity.CENTER);
         tbrow0.addView(tv1);
         TextView tv2 = new TextView(this);;
         tv2.setText(" Edit Item ");
@@ -118,12 +123,35 @@ public class PantryActivity extends AppCompatActivity {
         tbrow0.addView(tv3);
         tble.addView(tbrow0);
         // Gets all db entries
-        db.collection("pantry")
+        db.collection(userId)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
+                            if(task.getResult().size() == 0) {
+                                // Create temp document to initialize db
+                                Map<String, Object> item = new HashMap<>();
+                                item.put("name", "apple");
+                                item.put("type", "unknown");
+                                item.put("quantity", 1);
+
+                                // Add a temp document upon first user sign in
+                                db.collection(userId)
+                                        .add(item)
+                                        .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                            @Override
+                                            public void onSuccess(DocumentReference documentReference) {
+                                                Log.d("PantryActivity", "DocumentSnapshot added with ID: " + documentReference.getId());
+                                            }
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Log.w("PantryActivity", "Error adding initial document", e);
+                                            }
+                                        });
+                            }
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 final QueryDocumentSnapshot doc = document;
                                 final TableRow tbrow = new TableRow(PantryActivity.this);
@@ -132,6 +160,7 @@ public class PantryActivity extends AppCompatActivity {
                                 t2v.setText(document.getString("name"));
                                 t2v.setTextColor(Color.BLACK);
                                 t2v.setGravity(Gravity.CENTER);
+                                t2v.setMaxWidth(500);
                                 checkBox.setOnClickListener(new View.OnClickListener() {
                                     public void onClick(View v) {
                                         handleSelectedCheckBox(doc, v, t2v);
@@ -160,7 +189,9 @@ public class PantryActivity extends AppCompatActivity {
                                 tbrow.addView(deleteBtn);
                                 tble.addView(tbrow);
                             }
+
                         } else {
+                            Toast.makeText(PantryActivity.this, "Error getting documents", Toast.LENGTH_LONG).show();
                             Log.w("PantryActivity", "Error getting documents.", task.getException());
                         }
                     }

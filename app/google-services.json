@@ -15,6 +15,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "1097195351778-e5ob5s79enggci3u8fe3ivc0r6m8sjmf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.pantryscanner",
+            "certificate_hash": "b0f670191e64820c00c44275eb0db14d00358b63"
+          }
+        },
+        {
+          "client_id": "1097195351778-q6h0n2kg7d5hdnb3g721ou7r65975kac.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.pantryscanner",
+            "certificate_hash": "e341e80b7704975ff4771bacf6a544d5b490a797"
+          }
+        },
+        {
           "client_id": "1097195351778-3lup0asq3028h2i4vjhoieicgfdkqbdt.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -29,7 +45,7 @@
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAecYbiuMFam1UU3rl5LhRgRsJu_Fu4e3M"
+          "current_key": "AIzaSyCux2MKrh1nSZXPktwevGOE3_Q2ZgyYJpA"
         }
       ],
       "services": {

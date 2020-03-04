@@ -66,7 +66,7 @@ public class LoginActivity extends AppCompatActivity {
         // the GoogleSignInAccount will be non-null.
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
         if(account != null) {
-            // user already logged in, switch to main activity
+            // user already logged in, switch to pantry activity
             Toast.makeText(context, "Logged in", Toast.LENGTH_LONG).show();
             Intent intent = new Intent(context, PantryActivity.class);
             startActivity(intent);
@@ -104,7 +104,7 @@ public class LoginActivity extends AppCompatActivity {
                             if (task.isSuccessful()) {
                                 // Sign in success, update UI with the signed-in user's information
                                 Toast.makeText(context, "Logged in", Toast.LENGTH_LONG).show();
-                                Intent intent = new Intent(context, MainActivity.class);
+                                Intent intent = new Intent(context, PantryActivity.class);
                                 startActivity(intent);
                                 finish();
 
