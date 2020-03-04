@@ -23,7 +23,7 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.gms.vision.Frame;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.ml.vision.FirebaseVision;
@@ -50,12 +50,17 @@ public class AddItemActivity extends AppCompatActivity {
     Button openBtn, cameraBtn, addButton, pantryButton;
     TextView instructTxt, ingredientTxt;
     ImageView myImageView;
+    String userId;
     private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_item_activity);
+
+        // Gets the userID
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        userId = auth.getUid();
 
         openBtn = findViewById(R.id.uploadButton);
         cameraBtn = findViewById(R.id.cameraButton);
@@ -93,14 +98,14 @@ public class AddItemActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "Please Specify An Item To Add", Toast.LENGTH_LONG).show();
                 }
                 else {
-                    // Create a new pantry item for testing
+                    // Create a new pantry item document
                     Map<String, Object> item = new HashMap<>();
                     item.put("name", ingredientTxt.getText().toString());
                     item.put("type", "unknown");
                     item.put("quantity", 1);
 
                     // Add a new document with a generated ID
-                    db.collection("pantry")
+                    db.collection(userId)
                             .add(item)
                             .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                                 @Override
