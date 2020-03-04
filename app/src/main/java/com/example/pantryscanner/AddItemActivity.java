@@ -237,8 +237,14 @@ public class AddItemActivity extends AppCompatActivity {
                                                     interpret_upc(thisCode.getRawValue());
                                                 }
                                                 else {
-                                                    Toast.makeText(AddItemActivity.this,"No Barcode Detected",Toast.LENGTH_SHORT).show();
+                                                    Toast.makeText(AddItemActivity.this,"No value in barcode",Toast.LENGTH_SHORT).show();
                                                 }
+                                            }
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Toast.makeText(AddItemActivity.this,"No barcode detected",Toast.LENGTH_SHORT).show();
                                             }
                                         });
                             }

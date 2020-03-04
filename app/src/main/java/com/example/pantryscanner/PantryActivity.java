@@ -101,12 +101,13 @@ public class PantryActivity extends AppCompatActivity {
         tble = findViewById(R.id.displayLayout);
         TableRow tbrow0 = new TableRow(this);
         TextView tv = new TextView(this);
-        tv.setText(" Check Box ");
+        tv.setText("Check Box ");
         tv.setTextColor(Color.WHITE);
         tbrow0.addView(tv);
         TextView tv1 = new TextView(this);
         tv1.setText(" Item Name ");
         tv1.setTextColor(Color.WHITE);
+        tv1.setGravity(Gravity.CENTER);
         tbrow0.addView(tv1);
         TextView tv2 = new TextView(this);;
         tv2.setText(" Edit Item ");
@@ -132,6 +133,7 @@ public class PantryActivity extends AppCompatActivity {
                                 t2v.setText(document.getString("name"));
                                 t2v.setTextColor(Color.BLACK);
                                 t2v.setGravity(Gravity.CENTER);
+                                t2v.setMaxWidth(500);
                                 checkBox.setOnClickListener(new View.OnClickListener() {
                                     public void onClick(View v) {
                                         handleSelectedCheckBox(doc, v, t2v);
@@ -161,6 +163,7 @@ public class PantryActivity extends AppCompatActivity {
                                 tble.addView(tbrow);
                             }
                         } else {
+                            Toast.makeText(PantryActivity.this, "Error getting documents", Toast.LENGTH_LONG).show();
                             Log.w("PantryActivity", "Error getting documents.", task.getException());
                         }
                     }
