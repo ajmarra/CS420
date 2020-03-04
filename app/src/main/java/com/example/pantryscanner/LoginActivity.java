@@ -68,7 +68,7 @@ public class LoginActivity extends AppCompatActivity {
         if(account != null) {
             // user already logged in, switch to main activity
             Toast.makeText(context, "Logged in", Toast.LENGTH_LONG).show();
-            Intent intent = new Intent(context, MainActivity.class);
+            Intent intent = new Intent(context, PantryActivity.class);
             startActivity(intent);
             finish();
         }
