@@ -14,30 +14,42 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.util.SparseArray;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.gms.vision.Frame;
-import com.google.android.gms.vision.barcode.Barcode;
-import com.google.android.gms.vision.barcode.BarcodeDetector;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.ml.vision.FirebaseVision;
+import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode;
+import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetector;
+import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetectorOptions;
+import com.google.firebase.ml.vision.common.FirebaseVisionImage;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executor;
 
 
 public class AddItemActivity extends AppCompatActivity {
-    Button btn, openBtn, cameraBtn, addButton;
-    TextView txtView;
+    Button openBtn, cameraBtn, addButton, pantryButton;
+    TextView instructTxt, ingredientTxt;
     ImageView myImageView;
-    Frame frame;
-    BarcodeDetector detector;
     private FirebaseFirestore db;
 
     @Override
@@ -45,7 +57,6 @@ public class AddItemActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_item_activity);
 
-        btn = findViewById(R.id.button);
         openBtn = findViewById(R.id.uploadButton);
         cameraBtn = findViewById(R.id.cameraButton);
         addButton = findViewById(R.id.addButton);
@@ -54,33 +65,64 @@ public class AddItemActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
 
         myImageView = findViewById(R.id.imgview);
-        /*Bitmap myBitmap = BitmapFactory.decodeResource(
-                getApplicationContext().getResources(),
-                R.drawable.puppy);
-        myImageView.setImageBitmap(myBitmap);*/
 
-        txtView = findViewById(R.id.txtContent);
+        instructTxt = findViewById(R.id.textView2);
+        ingredientTxt = findViewById(R.id.editText2);
 
         // Creates the barcode detector
-        detector =
-                new BarcodeDetector.Builder(getApplicationContext())
-                        .setBarcodeFormats(Barcode.DATA_MATRIX | Barcode.QR_CODE)
+        FirebaseVisionBarcodeDetectorOptions options =
+                new FirebaseVisionBarcodeDetectorOptions.Builder()
+                        .setBarcodeFormats(
+                                FirebaseVisionBarcode.FORMAT_ALL_FORMATS)
                         .build();
-        if(!detector.isOperational()){
-            txtView.setText("Could not set up the detector!");
-            return;
-        }
 
-        /*frame = new Frame.Builder().setBitmap(myBitmap).build();
-        final SparseArray<Barcode> barcodes = detector.detect(frame);
 
-        btn.setOnClickListener(new View.OnClickListener() {
+        // Switch to PantryActivity
+        pantryButton = findViewById(R.id.pantryAct);
+        pantryButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent i = new Intent(AddItemActivity.this, PantryActivity.class);
+                startActivity(i);
+            }
+        });
+
+        addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Barcode thisCode = barcodes.valueAt(0);
-                txtView.setText(thisCode.rawValue);
+                if (ingredientTxt.getText().toString().equals("")) {
+                    Toast.makeText(getApplicationContext(), "Please Specify An Item To Add", Toast.LENGTH_LONG).show();
+                }
+                else {
+                    // Create a new pantry item for testing
+                    Map<String, Object> item = new HashMap<>();
+                    item.put("name", ingredientTxt.getText().toString());
+                    item.put("type", "unknown");
+                    item.put("quantity", 1);
+
+                    // Add a new document with a generated ID
+                    db.collection("pantry")
+                            .add(item)
+                            .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                @Override
+                                public void onSuccess(DocumentReference documentReference) {
+                                    Log.d("AddItemActivity", "DocumentSnapshot added with ID: " + documentReference.getId());
+                                    Toast.makeText(AddItemActivity.this, "Item Added!", Toast.LENGTH_SHORT).show();
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.w("AddItemActivity", "Error adding document", e);
+                                }
+                            });
+                    ingredientTxt.setText("");
+                }
             }
-        }); */
+        });
+
+        instructTxt.setText("Scan a barcode or enter your product manually!");
+
+
 
         openBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -93,32 +135,6 @@ public class AddItemActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 switchToCamera();
-            }
-        });
-        addButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Create a new user with a first and last name
-                Map<String, Object> user = new HashMap<>();
-                user.put("first", "Ada");
-                user.put("last", "Lovelace");
-                user.put("born", 1815);
-
-                // Add a new document with a generated ID
-                db.collection("users")
-                        .add(user)
-                        .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                            @Override
-                            public void onSuccess(DocumentReference documentReference) {
-                                Log.d("MainActivity", "DocumentSnapshot added with ID: " + documentReference.getId());
-                            }
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.w("MainActivity", "Error adding document", e);
-                            }
-                        });
             }
         });
 
@@ -171,17 +187,24 @@ public class AddItemActivity extends AppCompatActivity {
                         Bitmap selectedImage = (Bitmap) data.getExtras().get("data");
                         myImageView.setImageBitmap(selectedImage);
 
-                        // Barcode button can only be used if there is a photo present to analyze
-                        frame = new Frame.Builder().setBitmap(selectedImage).build();
-                        final SparseArray<Barcode> barcodes = detector.detect(frame);
-
-                        btn.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                Barcode thisCode = barcodes.valueAt(0);
-                                txtView.setText(thisCode.rawValue);
-                            }
-                        });
+                        // Sets image to scan
+                        FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(selectedImage);
+                        FirebaseVisionBarcodeDetector detector = FirebaseVision.getInstance()
+                                .getVisionBarcodeDetector();
+                        // If barcode detected then it webscrapes the upc site
+                        Task<List<FirebaseVisionBarcode>> result = detector.detectInImage(image)
+                                .addOnSuccessListener(new OnSuccessListener<List<FirebaseVisionBarcode>>() {
+                                    @Override
+                                    public void onSuccess(List<FirebaseVisionBarcode> barcodes) {
+                                        if (barcodes.size() > 0) {
+                                            FirebaseVisionBarcode thisCode = barcodes.get(0);
+                                            interpret_upc(thisCode.getRawValue());
+                                        }
+                                        else {
+                                            Toast.makeText(AddItemActivity.this,"No Barcode Detected",Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+                                });
                     }
 
                     break;
@@ -200,17 +223,24 @@ public class AddItemActivity extends AppCompatActivity {
                                 myImageView.setImageBitmap(myBitmap);
                                 cursor.close();
 
-                                // Barcode button can only be used if there is a photo present to analyze
-                                frame = new Frame.Builder().setBitmap(myBitmap).build();
-                                final SparseArray<Barcode> barcodes = detector.detect(frame);
-
-                                btn.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        Barcode thisCode = barcodes.valueAt(0);
-                                        txtView.setText(thisCode.rawValue);
-                                    }
-                                });
+                                // Sets the image to scan
+                                FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(myBitmap);
+                                FirebaseVisionBarcodeDetector detector = FirebaseVision.getInstance()
+                                        .getVisionBarcodeDetector();
+                                // If barcode detected then it webscrapes the upc site
+                                Task<List<FirebaseVisionBarcode>> result = detector.detectInImage(image)
+                                        .addOnSuccessListener(new OnSuccessListener<List<FirebaseVisionBarcode>>() {
+                                            @Override
+                                            public void onSuccess(List<FirebaseVisionBarcode> barcodes) {
+                                                if (barcodes.size() > 0) {
+                                                    FirebaseVisionBarcode thisCode = barcodes.get(0);
+                                                    interpret_upc(thisCode.getRawValue());
+                                                }
+                                                else {
+                                                    Toast.makeText(AddItemActivity.this,"No Barcode Detected",Toast.LENGTH_SHORT).show();
+                                                }
+                                            }
+                                        });
                             }
                         }
                     }
@@ -219,6 +249,58 @@ public class AddItemActivity extends AppCompatActivity {
         }
     }
 
+    // Grabs product names from the upc interpreting website
+    private List<String> parse_upc_webpage(Document document) {
+        Elements b_sections = document.select("p > b");
+        List<String> possible_product_names = new ArrayList<String>();
+        for (Element b : b_sections) {
+            possible_product_names.add(b.text());
+        }
+        return possible_product_names;
+    }
 
+    //  A callable class to pass into an asynchronous task with webscraping instructions
+    public class BarcodeCallable implements Callable<Void> {
+        private String search_url;
+        private List<String> possible_product_names;
 
+        public BarcodeCallable(String search_url) {
+            this.search_url = search_url;
+        }
+
+        @Override
+        public Void call() {
+            try {
+                Document document = Jsoup.connect(this.search_url).get();
+                possible_product_names = parse_upc_webpage(document);
+                if (possible_product_names.isEmpty()) {
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), "No Product Found For Pictured Barcode", Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+                else {
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                        ingredientTxt.setText(possible_product_names.get(0));
+                        }
+                    });
+
+                }
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+    }
+
+    // Builds class objects and executes methods to set off upc analysis, adds found product to textView
+    private void interpret_upc(String upc) {
+        String upc_search_url = "https://www.upcitemdb.com/upc/" + upc;
+        Executor executor = new Invoker();
+        Callable barcode_scrape_call = new BarcodeCallable(upc_search_url);
+        executor.execute(new Webscraper(barcode_scrape_call));
+    }
 }
