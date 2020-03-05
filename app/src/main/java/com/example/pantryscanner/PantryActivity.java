@@ -181,7 +181,7 @@ public class PantryActivity extends AppCompatActivity {
                                 deleteBtn.setImageResource(R.drawable.delete);
                                 deleteBtn.setOnClickListener(new View.OnClickListener() {
                                     public void onClick(View v) {
-                                        db.collection("pantry").document(doc.getId()).delete();
+                                        db.collection(userId).document(doc.getId()).delete();
                                         tble.removeView(tbrow);
                                         Toast.makeText(PantryActivity.this, "Item Deleted", Toast.LENGTH_LONG).show();
                                     }
@@ -231,7 +231,7 @@ public class PantryActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Map<String, Object> data = new HashMap<>();
                 data.put("name", editText.getText().toString());
-                db.collection("pantry").document(doc1.getId())
+                db.collection(userId).document(doc1.getId())
                         .set(data);
                 tv1.setText(editText.getText().toString());
                 // Text field and button disappear when done.
