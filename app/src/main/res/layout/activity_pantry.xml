@@ -6,6 +6,17 @@
     android:layout_height="match_parent"
     tools:context=".PantryActivity">
 
+    <TextView
+        android:id="@+id/emptyText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="96dp"
+        android:layout_marginBottom="40dp"
+        android:text="Add items to populate your pantry!"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <Button
         android:id="@+id/recipeButton"
         android:layout_width="wrap_content"
@@ -31,7 +42,7 @@
         android:layout_width="fill_parent"
         android:layout_height="0dp"
         android:layout_alignParentStart="true"
-        android:background="#3d455b"
+        android:background="#9BB1EC"
         app:layout_constraintBottom_toTopOf="@+id/recipeButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
@@ -45,14 +56,14 @@
 
             <RelativeLayout
                 android:id="@+id/RelativeLayout1"
-                android:layout_width="fill_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
                 android:layout_gravity="center"
                 android:orientation="vertical">
 
                 <TableLayout
                     android:id="@+id/displayLayout"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_centerHorizontal="true"></TableLayout>
 
