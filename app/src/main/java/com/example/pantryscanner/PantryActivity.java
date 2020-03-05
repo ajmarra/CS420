@@ -25,16 +25,12 @@ import android.widget.Toast;
 import com.google.android.gms.common.util.ArrayUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.SetOptions;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -53,12 +49,20 @@ public class PantryActivity extends AppCompatActivity {
     private EditText editText;
     private FirebaseFirestore db;
     private TableLayout tble;
+    private String userId;
+    private TextView emptyText;
     private String[] toSearch = {};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pantry);
+
+        emptyText = findViewById(R.id.emptyText);
+
+        // Gets the userID
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        userId = auth.getUid();
 
         // Initializing database
         db = FirebaseFirestore.getInstance();
@@ -101,66 +105,79 @@ public class PantryActivity extends AppCompatActivity {
         tble = findViewById(R.id.displayLayout);
         TableRow tbrow0 = new TableRow(this);
         TextView tv = new TextView(this);
-        tv.setText(" Check Box ");
+        tv.setText("Select");
         tv.setTextColor(Color.WHITE);
+        tv.setGravity(Gravity.LEFT);
         tbrow0.addView(tv);
         TextView tv1 = new TextView(this);
         tv1.setText(" Item Name ");
         tv1.setTextColor(Color.WHITE);
+        tv1.setGravity(Gravity.CENTER);
         tbrow0.addView(tv1);
         TextView tv2 = new TextView(this);;
         tv2.setText(" Edit Item ");
         tv2.setTextColor(Color.WHITE);
+        tv2.setGravity(Gravity.RIGHT);
         tbrow0.addView(tv2);
         TextView tv3 = new TextView(this);
         tv3.setText(" Delete Item ");
         tv3.setTextColor(Color.WHITE);
+        tv3.setGravity(Gravity.RIGHT);
         tbrow0.addView(tv3);
         tble.addView(tbrow0);
         // Gets all db entries
-        db.collection("pantry")
+        db.collection(userId)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                final QueryDocumentSnapshot doc = document;
-                                final TableRow tbrow = new TableRow(PantryActivity.this);
-                                final CheckBox checkBox = new CheckBox(PantryActivity.this);
-                                final TextView t2v = new TextView(PantryActivity.this);
-                                t2v.setText(document.getString("name"));
-                                t2v.setTextColor(Color.BLACK);
-                                t2v.setGravity(Gravity.CENTER);
-                                checkBox.setOnClickListener(new View.OnClickListener() {
-                                    public void onClick(View v) {
-                                        handleSelectedCheckBox(doc, v, t2v);
-                                    }
-                                });
-                                tbrow.addView(checkBox);
-                                tbrow.addView(t2v);
-                                //If edit button is clicked then opens a text field with that item name
-                                ImageButton editBtn = new ImageButton(PantryActivity.this);
-                                editBtn.setImageResource(R.drawable.edit);
-                                editBtn.setOnClickListener(new View.OnClickListener() {
-                                    public void onClick(View v) {
-                                        editItem(doc, t2v);
-                                    }
-                                });
-                                tbrow.addView(editBtn);
-                                ImageButton deleteBtn = new ImageButton(PantryActivity.this);
-                                deleteBtn.setImageResource(R.drawable.delete);
-                                deleteBtn.setOnClickListener(new View.OnClickListener() {
-                                    public void onClick(View v) {
-                                        db.collection("pantry").document(doc.getId()).delete();
-                                        tble.removeView(tbrow);
-                                        Toast.makeText(PantryActivity.this, "Item Deleted", Toast.LENGTH_LONG).show();
-                                    }
-                                });
-                                tbrow.addView(deleteBtn);
-                                tble.addView(tbrow);
+                            if(task.getResult().size() == 0) {
+                                emptyText.setVisibility(View.VISIBLE);
                             }
+                            else {
+                                emptyText.setVisibility(View.GONE);
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    final QueryDocumentSnapshot doc = document;
+                                    final TableRow tbrow = new TableRow(PantryActivity.this);
+                                    final CheckBox checkBox = new CheckBox(PantryActivity.this);
+                                    final TextView t2v = new TextView(PantryActivity.this);
+                                    t2v.setText(document.getString("name"));
+                                    t2v.setTextColor(Color.BLACK);
+                                    t2v.setGravity(Gravity.CENTER);
+                                    t2v.setMaxWidth(500);
+                                    checkBox.setOnClickListener(new View.OnClickListener() {
+                                        public void onClick(View v) {
+                                            handleSelectedCheckBox(doc, v, t2v);
+                                        }
+                                    });
+                                    tbrow.addView(checkBox);
+                                    tbrow.addView(t2v);
+                                    //If edit button is clicked then opens a text field with that item name
+                                    ImageButton editBtn = new ImageButton(PantryActivity.this);
+                                    editBtn.setImageResource(R.drawable.edit);
+                                    editBtn.setOnClickListener(new View.OnClickListener() {
+                                        public void onClick(View v) {
+                                            editItem(doc, t2v);
+                                        }
+                                    });
+                                    tbrow.addView(editBtn);
+                                    ImageButton deleteBtn = new ImageButton(PantryActivity.this);
+                                    deleteBtn.setImageResource(R.drawable.delete);
+                                    deleteBtn.setOnClickListener(new View.OnClickListener() {
+                                        public void onClick(View v) {
+                                            db.collection(userId).document(doc.getId()).delete();
+                                            tble.removeView(tbrow);
+                                            Toast.makeText(PantryActivity.this, "Item Deleted", Toast.LENGTH_LONG).show();
+                                        }
+                                    });
+                                    tbrow.addView(deleteBtn);
+                                    tble.addView(tbrow);
+                                }
+                            }
+
                         } else {
+                            Toast.makeText(PantryActivity.this, "Error getting documents", Toast.LENGTH_LONG).show();
                             Log.w("PantryActivity", "Error getting documents.", task.getException());
                         }
                     }
@@ -185,7 +202,7 @@ public class PantryActivity extends AppCompatActivity {
             }
             toSearch = temp;
         }
-        System.out.println(ArrayUtils.toArrayList(toSearch).toString());
+        //System.out.println(ArrayUtils.toArrayList(toSearch).toString());
     }
 
     // Opens a field to edit an existing item in the database
@@ -200,7 +217,7 @@ public class PantryActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Map<String, Object> data = new HashMap<>();
                 data.put("name", editText.getText().toString());
-                db.collection("pantry").document(doc1.getId())
+                db.collection(userId).document(doc1.getId())
                         .set(data);
                 tv1.setText(editText.getText().toString());
                 // Text field and button disappear when done.
