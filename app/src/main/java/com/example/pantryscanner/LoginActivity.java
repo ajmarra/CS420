@@ -73,20 +73,6 @@ public class LoginActivity extends AppCompatActivity {
             finish();
         }
 
-        /*googleBtn = findViewById(R.id.sign_in_button);
-        googleBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                switch (view.getId()) {
-                    case R.id.sign_in_button:
-                        Intent signInIntent = client.getSignInIntent();
-                        startActivityForResult(signInIntent, RC_SIGN_IN);
-                        break;
-                    // ...
-                }
-            }
-        });*/
-
         loginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -97,6 +83,7 @@ public class LoginActivity extends AppCompatActivity {
                 if(emails.isEmpty() || password1.isEmpty()) {
                     Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_LONG).show();
                 }
+                // Uses FireBase to
                 else {
                     auth.signInWithEmailAndPassword(emails, password1).addOnCompleteListener(activity, new OnCompleteListener<AuthResult>() {
                         @Override
@@ -121,6 +108,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        // Sends the user to the signup activity page
         registerBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -130,6 +118,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        // Sends the user to the reset password activity page
         forgotPassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
