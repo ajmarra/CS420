@@ -168,7 +168,7 @@ public class PantryActivity extends AppCompatActivity {
                                         public void onClick(View v) {
                                             db.collection(userId).document(doc.getId()).delete();
                                             tble.removeView(tbrow);
-                                            Toast.makeText(PantryActivity.this, "Item Deleted", Toast.LENGTH_LONG).show();
+                                            Toast.makeText(PantryActivity.this, "Item Deleted", Toast.LENGTH_SHORT).show();
                                         }
                                     });
                                     tbrow.addView(deleteBtn);

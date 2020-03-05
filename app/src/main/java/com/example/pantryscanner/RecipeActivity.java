@@ -2,8 +2,13 @@ package com.example.pantryscanner;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
+import android.net.http.SslError;
 import android.os.Bundle;
+import android.webkit.SslErrorHandler;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.widget.Toast;
 
 public class RecipeActivity extends AppCompatActivity {
 
@@ -14,10 +19,28 @@ public class RecipeActivity extends AppCompatActivity {
 
         WebView recipeWebview = (WebView) findViewById(R.id.recipeWebview);
 
-//        recipeWebview.getSettings().setLoadWithOverviewMode(true); // TODO: Do we need this?
-//        recipeWebview.getSettings().setUseWideViewPort(true); // TODO: Do we need this?
-        recipeWebview.getSettings().setJavaScriptEnabled(true); // Apparently this is required, the page had issues loading until I added it
-        recipeWebview.getSettings().setJavaScriptCanOpenWindowsAutomatically(true); // This was an attempt to stop pop-up ads and it didn't work
+        // Sets up a webview client to handle SSL errors
+        recipeWebview.setWebViewClient(new WebViewClient() {
+
+            @Override
+            public void onReceivedSslError (WebView view, SslErrorHandler handler, SslError error) {
+                Toast.makeText(RecipeActivity.this, "Recipe Page Unsafe, Request A Different Recipe", Toast.LENGTH_LONG).show();
+                handler.cancel();
+                Intent reverse_intent = new Intent(RecipeActivity.this, PantryActivity.class);
+                startActivity(reverse_intent);
+            }
+        });
+
+        // JavaScript is enabled because it is required for the recipe pages to load. We looked
+        // into implementing XSS attack protection to mitigate security vulnerabilities, for
+        // example the OWASP Project (https://www2.owasp.org/owasp-java-encoder/), but decided it
+        // was beyond the scope of this class.
+        recipeWebview.getSettings().setJavaScriptEnabled(true);
+
+        //This is an attempt to stop pop-up ads
+        recipeWebview.getSettings().setJavaScriptCanOpenWindowsAutomatically(false);
+
+        // Load the url passed by the intent in the WebView
         String url = getIntent().getStringExtra("RECIPE_URL");
         recipeWebview.loadUrl(url);
     }

@@ -242,14 +242,14 @@ public class AddItemActivity extends AppCompatActivity {
                                                     interpret_upc(thisCode.getRawValue());
                                                 }
                                                 else {
-                                                    Toast.makeText(AddItemActivity.this,"No value in barcode",Toast.LENGTH_SHORT).show();
+                                                    Toast.makeText(AddItemActivity.this,"No Value In Barcode",Toast.LENGTH_SHORT).show();
                                                 }
                                             }
                                         })
                                         .addOnFailureListener(new OnFailureListener() {
                                             @Override
                                             public void onFailure(@NonNull Exception e) {
-                                                Toast.makeText(AddItemActivity.this,"No barcode detected",Toast.LENGTH_SHORT).show();
+                                                Toast.makeText(AddItemActivity.this,"No Barcode Detected",Toast.LENGTH_SHORT).show();
                                             }
                                         });
                             }
@@ -267,6 +267,7 @@ public class AddItemActivity extends AppCompatActivity {
         for (Element b : b_sections) {
             possible_product_names.add(b.text());
         }
+
         return possible_product_names;
     }
 
