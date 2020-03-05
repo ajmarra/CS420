@@ -267,11 +267,10 @@ public class AddItemActivity extends AppCompatActivity {
         for (Element b : b_sections) {
             possible_product_names.add(b.text());
         }
-
         return possible_product_names;
     }
 
-    //  A callable class to pass into an asynchronous task with webscraping instructions
+    //  A Callable class to pass into an asynchronous task with specific webscraping instructions
     public class BarcodeCallable implements Callable<Void> {
         private String search_url;
         private List<String> possible_product_names;
