@@ -12,18 +12,18 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ResetPasswordActivity"></activity>
-        <activity android:name=".LoginActivity">
+        <activity android:name=".ResetPasswordActivity" android:exported="false"></activity>
+        <activity android:name=".LoginActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".SignUpActivity" />
-        <activity android:name=".PantryActivity" />
-        <activity android:name=".RecipeActivity" />
-        <activity android:name=".MainActivity">
+        <activity android:name=".SignUpActivity" android:exported="false"/>
+        <activity android:name=".PantryActivity" android:exported="false"/>
+        <activity android:name=".RecipeActivity" android:exported="false"/>
+        <activity android:name=".MainActivity" android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
