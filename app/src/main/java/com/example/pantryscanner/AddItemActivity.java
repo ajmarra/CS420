@@ -242,14 +242,14 @@ public class AddItemActivity extends AppCompatActivity {
                                                     interpret_upc(thisCode.getRawValue());
                                                 }
                                                 else {
-                                                    Toast.makeText(AddItemActivity.this,"No value in barcode",Toast.LENGTH_SHORT).show();
+                                                    Toast.makeText(AddItemActivity.this,"No Value In Barcode",Toast.LENGTH_SHORT).show();
                                                 }
                                             }
                                         })
                                         .addOnFailureListener(new OnFailureListener() {
                                             @Override
                                             public void onFailure(@NonNull Exception e) {
-                                                Toast.makeText(AddItemActivity.this,"No barcode detected",Toast.LENGTH_SHORT).show();
+                                                Toast.makeText(AddItemActivity.this,"No Barcode Detected",Toast.LENGTH_SHORT).show();
                                             }
                                         });
                             }
@@ -270,7 +270,7 @@ public class AddItemActivity extends AppCompatActivity {
         return possible_product_names;
     }
 
-    //  A callable class to pass into an asynchronous task with webscraping instructions
+    //  A Callable class to pass into an asynchronous task with specific webscraping instructions
     public class BarcodeCallable implements Callable<Void> {
         private String search_url;
         private List<String> possible_product_names;

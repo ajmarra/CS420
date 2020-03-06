@@ -13,6 +13,8 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -23,7 +25,6 @@ public class ResetPasswordActivity extends AppCompatActivity {
     private FirebaseAuth auth;
 
     private EditText email;
-    private Button reset;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,44 +33,33 @@ public class ResetPasswordActivity extends AppCompatActivity {
 
         auth = FirebaseAuth.getInstance();
 
-        reset = findViewById(R.id.reset);
+        Button reset = findViewById(R.id.reset);
         email = findViewById(R.id.email);
 
-        final String email = getIntent().getStringExtra("FORGOT_PASSWORD_STRING");
-
         final Context context = this;
-        final Activity activity = this;
 
+        // Prompts the user for an email to which to and send a password reset email
         reset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (email.isEmpty()) {
-                    Toast.makeText(context, "Enter email", Toast.LENGTH_LONG).show();
+                if (email.getText().toString().equals("")) {
+                    Toast.makeText(context, "Enter Email", Toast.LENGTH_LONG).show();
                 }
-            else
-
-            {
-                auth.sendPasswordResetEmail(email);
-                Toast.makeText(context, "Email sent", Toast.LENGTH_LONG).show();
-                        /*.addOnCompleteListener(activity, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-
-                            Intent intent = new Intent(activity, LoginActivity.class);
-                            startActivity(intent);
-                            finish();
-
-                            FirebaseUser user = auth.getCurrentUser();
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            Toast.makeText(context, "Unable to send reset mail", Toast.LENGTH_LONG).show();
+                else
+                {
+                    // Sends reset email if email is valid, otherwise prompts user with Toast
+                    auth.sendPasswordResetEmail(email.getText().toString()).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                Toast.makeText(context, "Email Sent", Toast.LENGTH_LONG).show();
+                                email.setText("");
+                            } else {
+                                Toast.makeText(context, "Something Went Wrong", Toast.LENGTH_LONG).show();
+                            }
                         }
-                    }
-
-                });*/
-            }
+                    });
+                }
             }
         });
     }
