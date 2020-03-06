@@ -51,12 +51,14 @@ public class PantryActivity extends AppCompatActivity {
     private TableLayout tble;
     private String userId;
     private TextView emptyText;
-    private String[] toSearch = {};
+    private String[] toSearch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pantry);
+
+        toSearch = new String[0];
 
         emptyText = findViewById(R.id.emptyText);
 
@@ -211,7 +213,7 @@ public class PantryActivity extends AppCompatActivity {
         final QueryDocumentSnapshot doc1 = doc;
         submitButton.setVisibility(View.VISIBLE);
         editText.setVisibility(View.VISIBLE);
-        editText.setText(doc.getString("name"));
+        editText.setText(tv.getText().toString());
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -222,7 +224,7 @@ public class PantryActivity extends AppCompatActivity {
                 tv1.setText(editText.getText().toString());
 
                 for(int i = 0; i < toSearch.length; i++) {
-                    if (toSearch[i] == doc1.getString("name")){
+                    if (toSearch[i] == tv1.getText().toString()){
                         toSearch[i] = editText.getText().toString();
                     }
                 }

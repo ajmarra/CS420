@@ -1,5 +1,6 @@
 package com.example.pantryscanner;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -43,5 +44,14 @@ public class RecipeActivity extends AppCompatActivity {
         // Load the url passed by the intent in the WebView
         String url = getIntent().getStringExtra("RECIPE_URL");
         recipeWebview.loadUrl(url);
+
+        OnBackPressedCallback callback = new OnBackPressedCallback(true ) {
+            @Override
+            public void handleOnBackPressed() {
+                Intent i = new Intent(RecipeActivity.this, PantryActivity.class);
+                startActivity(i);
+            }
+        };
+
     }
 }
