@@ -168,7 +168,7 @@ public class PantryActivity extends AppCompatActivity {
                                         public void onClick(View v) {
                                             db.collection(userId).document(doc.getId()).delete();
                                             tble.removeView(tbrow);
-                                            Toast.makeText(PantryActivity.this, "Item Deleted", Toast.LENGTH_LONG).show();
+                                            Toast.makeText(PantryActivity.this, "Item Deleted", Toast.LENGTH_SHORT).show();
                                         }
                                     });
                                     tbrow.addView(deleteBtn);
@@ -220,6 +220,12 @@ public class PantryActivity extends AppCompatActivity {
                 db.collection(userId).document(doc1.getId())
                         .set(data);
                 tv1.setText(editText.getText().toString());
+
+                for(int i = 0; i < toSearch.length; i++) {
+                    if (toSearch[i] == doc1.getString("name")){
+                        toSearch[i] = editText.getText().toString();
+                    }
+                }
                 // Text field and button disappear when done.
                 submitButton.setVisibility(View.GONE);
                 editText.setVisibility(View.GONE);
@@ -269,7 +275,7 @@ public class PantryActivity extends AppCompatActivity {
         return recipe_urls;
     }
 
-    //  A callable class to pass into an asynchronous task with webscraping instructions
+    //  A Callable class to pass into an asynchronous task with webscraping instructions
     public class RecipeCallable implements Callable<Void> {
         private String search_url;
 
