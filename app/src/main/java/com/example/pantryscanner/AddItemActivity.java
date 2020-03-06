@@ -3,6 +3,7 @@ package com.example.pantryscanner;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import io.opencensus.internal.Utils;
 
 import android.Manifest;
 import android.content.Intent;
@@ -12,6 +13,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -37,8 +39,11 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +55,7 @@ public class AddItemActivity extends AppCompatActivity {
     Button openBtn, cameraBtn, addButton, pantryButton;
     TextView instructTxt, ingredientTxt;
     ImageView myImageView;
-    String userId;
+    String userId, mCurrentPhotoPath;
     private FirebaseFirestore db;
 
     @Override
@@ -166,6 +171,8 @@ public class AddItemActivity extends AppCompatActivity {
         startActivityForResult(takePicture, 0);
     }
 
+
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults)
     {
@@ -176,7 +183,7 @@ public class AddItemActivity extends AppCompatActivity {
                     Intent choosePhoto = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                     startActivityForResult(choosePhoto, 1);
                 } else {
-                    System.out.println("No gallery permission granted");
+                    Toast.makeText(AddItemActivity.this,"No gallery permission granted",Toast.LENGTH_SHORT).show();
                 }
                 break;
         }
@@ -188,12 +195,13 @@ public class AddItemActivity extends AppCompatActivity {
         if (resultCode != RESULT_CANCELED) {
             switch (requestCode) {
                 case 0: // Camera
+
                     if (resultCode == RESULT_OK && data != null) {
                         Bitmap selectedImage = (Bitmap) data.getExtras().get("data");
                         myImageView.setImageBitmap(selectedImage);
-
+                        Bitmap help = selectedImage;
                         // Sets image to scan
-                        FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(selectedImage);
+                        FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(help);
                         FirebaseVisionBarcodeDetector detector = FirebaseVision.getInstance()
                                 .getVisionBarcodeDetector();
                         // If barcode detected then it webscrapes the upc site
@@ -206,7 +214,7 @@ public class AddItemActivity extends AppCompatActivity {
                                             interpret_upc(thisCode.getRawValue());
                                         }
                                         else {
-                                            Toast.makeText(AddItemActivity.this,"No Barcode Detected",Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(AddItemActivity.this,"No value in barcode",Toast.LENGTH_SHORT).show();
                                         }
                                     }
                                 });
@@ -294,7 +302,7 @@ public class AddItemActivity extends AppCompatActivity {
                 else {
                     runOnUiThread(new Runnable() {
                         public void run() {
-                        ingredientTxt.setText(possible_product_names.get(0));
+                            ingredientTxt.setText(possible_product_names.get(0));
                         }
                     });
 
