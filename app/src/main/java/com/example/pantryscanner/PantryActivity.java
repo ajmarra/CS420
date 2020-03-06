@@ -220,6 +220,12 @@ public class PantryActivity extends AppCompatActivity {
                 db.collection(userId).document(doc1.getId())
                         .set(data);
                 tv1.setText(editText.getText().toString());
+
+                for(int i = 0; i < toSearch.length; i++) {
+                    if (toSearch[i] == doc1.getString("name")){
+                        toSearch[i] = editText.getText().toString();
+                    }
+                }
                 // Text field and button disappear when done.
                 submitButton.setVisibility(View.GONE);
                 editText.setVisibility(View.GONE);
