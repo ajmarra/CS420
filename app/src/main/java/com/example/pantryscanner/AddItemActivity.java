@@ -231,12 +231,9 @@ public class AddItemActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode != RESULT_CANCELED) {
             switch (requestCode) {
+
                 case 0: // Camera
-
-                    if (resultCode == RESULT_OK && data != null) {
-//                        Bitmap selectedImage = (Bitmap) data.getExtras().get("data");
-////                        myImageView.setImageBitmap(selectedImage);
-
+                    Toast.makeText(AddItemActivity.this, Integer.toString(resultCode) ,Toast.LENGTH_SHORT).show();
                         try {
                             Bitmap selectedImage = MediaStore.Images.Media.getBitmap(this.getContentResolver(), Uri.parse(currentPhotoPath));
                             myImageView.setImageBitmap(selectedImage);
@@ -254,16 +251,14 @@ public class AddItemActivity extends AppCompatActivity {
                                                 interpret_upc(thisCode.getRawValue());
                                             }
                                             else {
-                                                Toast.makeText(AddItemActivity.this,"No value in barcode",Toast.LENGTH_SHORT).show();
+                                                Toast.makeText(AddItemActivity.this,"No barcode detected",Toast.LENGTH_SHORT).show();
                                             }
                                         }
                                     });
                         } catch (IOException e) {
                             e.printStackTrace();
+                            Toast.makeText(AddItemActivity.this,"Failed to load image",Toast.LENGTH_SHORT).show();
                         }
-
-
-                    }
 
                     break;
                 case 1: // Upload photo
