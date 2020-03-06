@@ -3,6 +3,7 @@ package com.example.pantryscanner;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.FileProvider;
 import io.opencensus.internal.Utils;
 
 import android.Manifest;
@@ -50,12 +51,14 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 
+import static java.security.AccessController.getContext;
+
 
 public class AddItemActivity extends AppCompatActivity {
     Button openBtn, cameraBtn, addButton, pantryButton;
     TextView instructTxt, ingredientTxt;
     ImageView myImageView;
-    String userId, mCurrentPhotoPath;
+    String userId, currentPhotoPath;
     private FirebaseFirestore db;
 
     @Override
@@ -167,11 +170,45 @@ public class AddItemActivity extends AppCompatActivity {
 
     private void switchToCamera() {
         // Probably should have some kind of permissions check here to access the camera?
-        Intent takePicture = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-        startActivityForResult(takePicture, 0);
+//        Intent takePicture = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+//        startActivityForResult(takePicture, 0);
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // Ensure that there's a camera activity to handle the intent
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            // Create the File where the photo should go
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+                // Error occurred while creating the File
+            }
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                Uri photoURI = FileProvider.getUriForFile(this,
+                        "com.example.pantryscanner.fileprovider",
+                        photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(takePictureIntent, 0);
+            }
+        }
     }
 
 
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        currentPhotoPath = "file://" + image.getAbsolutePath();
+        return image;
+    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults)
@@ -197,27 +234,35 @@ public class AddItemActivity extends AppCompatActivity {
                 case 0: // Camera
 
                     if (resultCode == RESULT_OK && data != null) {
-                        Bitmap selectedImage = (Bitmap) data.getExtras().get("data");
-                        myImageView.setImageBitmap(selectedImage);
-                        Bitmap help = selectedImage;
-                        // Sets image to scan
-                        FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(help);
-                        FirebaseVisionBarcodeDetector detector = FirebaseVision.getInstance()
-                                .getVisionBarcodeDetector();
-                        // If barcode detected then it webscrapes the upc site
-                        Task<List<FirebaseVisionBarcode>> result = detector.detectInImage(image)
-                                .addOnSuccessListener(new OnSuccessListener<List<FirebaseVisionBarcode>>() {
-                                    @Override
-                                    public void onSuccess(List<FirebaseVisionBarcode> barcodes) {
-                                        if (barcodes.size() > 0) {
-                                            FirebaseVisionBarcode thisCode = barcodes.get(0);
-                                            interpret_upc(thisCode.getRawValue());
+//                        Bitmap selectedImage = (Bitmap) data.getExtras().get("data");
+////                        myImageView.setImageBitmap(selectedImage);
+
+                        try {
+                            Bitmap selectedImage = MediaStore.Images.Media.getBitmap(this.getContentResolver(), Uri.parse(currentPhotoPath));
+                            myImageView.setImageBitmap(selectedImage);
+                            // Sets image to scan
+                            FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(selectedImage);
+                            FirebaseVisionBarcodeDetector detector = FirebaseVision.getInstance()
+                                    .getVisionBarcodeDetector();
+                            // If barcode detected then it webscrapes the upc site
+                            Task<List<FirebaseVisionBarcode>> result = detector.detectInImage(image)
+                                    .addOnSuccessListener(new OnSuccessListener<List<FirebaseVisionBarcode>>() {
+                                        @Override
+                                        public void onSuccess(List<FirebaseVisionBarcode> barcodes) {
+                                            if (barcodes.size() > 0) {
+                                                FirebaseVisionBarcode thisCode = barcodes.get(0);
+                                                interpret_upc(thisCode.getRawValue());
+                                            }
+                                            else {
+                                                Toast.makeText(AddItemActivity.this,"No value in barcode",Toast.LENGTH_SHORT).show();
+                                            }
                                         }
-                                        else {
-                                            Toast.makeText(AddItemActivity.this,"No value in barcode",Toast.LENGTH_SHORT).show();
-                                        }
-                                    }
-                                });
+                                    });
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+
                     }
 
                     break;
