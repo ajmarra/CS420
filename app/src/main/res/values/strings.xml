@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">PantryScanner</string>
+    <string name="app_name">SmartPantry</string>
     <string name="confirmbutton">Sign Up</string>
     <string name="email_hint">Enter your email</string>
     <string name="enter_password_hint">Password</string>
@@ -11,4 +11,5 @@
     <string name="log_in">Log In</string>
     <string name="forgot_password">I forgot my password</string>
     <string name="reset_password">Send reset link</string>
+    <string name="welcome_message2">Welcome to SmartPantry!</string>
 </resources>
